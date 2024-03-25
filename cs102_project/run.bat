@@ -1,0 +1,1 @@
+java -cp classes;blackjack.menus blackjack/Blackjack
