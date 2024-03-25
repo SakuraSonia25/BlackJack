@@ -374,6 +374,9 @@ public class Round {
             toChallenge.remove(opp);
         }
 
+        // update cash amt
+        updateCashAmt(this.players);
+
         // End Challenge Method
     }
     // this method is when dealer challenges all players 
