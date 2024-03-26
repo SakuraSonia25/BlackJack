@@ -4,13 +4,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.*;
 
 // PACKAGES ISSUE
 import blackjack.items.*;
 import blackjack.players.*;
+import blackjack.menus.*;;
 
 public class Round {
 
+    // To Print the icons
     public static PrintWriter stdout = new PrintWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8),
             true);
     private Scanner sc = new Scanner(System.in);
@@ -18,13 +21,30 @@ public class Round {
     /* ENCODINGS */
     private static Map<Character, String> luckyHandMap = new HashMap<>() {
         {
-            put('n',"< 12");put('a',"DOUBLE As");put('j',"BLACKJACK");put('s',"777");put('d',"DRAGON");put('b',"BUST");}};
+            put('n', "< 12");
+            put('a', "DOUBLE As");
+            put('j', "BLACKJACK");
+            put('s', "777");
+            put('d', "DRAGON");
+            put('b', "BUST");
+        }
+    };
     private static Map<Character, String> resultMap = new HashMap<>() {
         {
-            put('w',"win");put('l',"lose");put('d',"draw");put('c',"notChallenge");put('D',"dealer");}};
+            put('w', "WIN");
+            put('l', "LOSE");
+            put('d', "DRAW");
+            put('c', "notChallenge");
+            put('D', "dealer");
+        }
+    };
     private static Map<Character, String> statusMap = new HashMap<>() {
         {
-            put('w',"Waiting");put('t',"Thinking");put('d',"Done!");}};
+            put('w', "Waiting");
+            put('t', "Thinking");
+            put('d', "Done!");
+        }
+    };
 
     /* ATTRIBUTES */
     private Deck deck;
@@ -80,7 +100,7 @@ public class Round {
                         turnOutcome = hit(player); // hit a card
                         System.out.println("-- " + player.getName() + " draws a card"); // display action to human
                     } else {
-                        turnOutcome = playerStand(player); // stand
+                        turnOutcome = stand(player); // stand
                         System.out.println("-- " + player.getName() + " stands"); // display action to human
                     }
 
@@ -102,16 +122,7 @@ public class Round {
         setPlayerStatus(player, 'd'); // set to done
 
         // display turn outcome
-        if (turnOutcome != 'n') {
-            if (player instanceof BotPlayer) {
-                System.out.println(player.getName() + " " + (turnOutcome != 'b' ? "GOT" : "") + luckyHandMap.get(turnOutcome) + "!\n");
-            } else {
-                displayHeading("Your Hand", '=', 25);
-                System.out.println(player.getHandFromPerson().displayOpenHand());
-                System.out.println("\nYOU " + (turnOutcome != 'b' ? "GOT" : "") + luckyHandMap.get(turnOutcome) + "!");
-                promptEnterKey(); // prompt player to press enter key to proceed
-            }
-        }
+        displayTurnResult(turnOutcome, player);
 
     }
 
@@ -153,246 +164,20 @@ public class Round {
             if (botAction == 'h') {
                 // auto challenge
                 botDealerChallenge(botDealer);
+                setPlayerLucky(this.dealer, turnOutcome);
             }
 
             // dealer done
             System.out.println("Dealer is done!\n");
 
-        } else { // else dealer is human
-            int stillChallenging = 1;
-
-            // 0 - stop; 1 - continue w hit option; -1 - continue without hit option
-            while (stillChallenging != 0) {
-
-                if (stillChallenging == 1) { // prompt action with hit option
-
-                    // prompt user for action
-                    // Scanner sc = new Scanner(System.in);
-                    int choice;
-                    do {
-                        displayDealerTurnOptions(this.dealer.getHandFromPerson());
-                        choice = checkForInputException(sc);
-
-                        switch (choice) {
-                            case 1:
-                                turnOutcome = hit(this.dealer);
-                                break;
-                            case 2:
-                                stillChallenging = dealerChallenge();
-                                break;
-                            default:
-                                System.out.println("Please enter a choice between 1 and 2.\n");
-                        }
-
-                    } while (choice != 1 && choice != 2);
-
-                    // remove hit option if dealer hand is not lucky hand
-                    if (turnOutcome != 'n') {
-
-                        stillChallenging = -1; // remove hit option
-                        setPlayerLucky(this.dealer, turnOutcome); // update luckyhand outcome
-
-                        // display turn outcome
-                        // System.out.println("turnOucome=" + turnOutcome);
-                        if (turnOutcome == 'b') {
-                            System.out.println("You BUST!");
-                        } else if (turnOutcome != 'n') {
-                            System.out.println(turnOutcome + ": You got a " + luckyHandMap.get(turnOutcome) + "!");
-                        }
-                        System.out.println("\nLets pick opponents to challenge!");
-                        promptEnterKey(); // prompt player to press enter key to proceed
-                    }
-
-                } else { // prompt action without hit option
-                    stillChallenging = dealerChallenge();
-                    // System.out.println("stillChallenging2 =" +stillChallenging);
-                }
-
-                // System.out.println("stillChallenging="+stillChallenging);
-            }
-            // sc.close();
+        }
+        // else dealer is human
+        else {
+            promptHumanDealer();
         }
 
         // set player luckyhand outcome and status to done
-        setPlayerLucky(this.dealer, turnOutcome);
         setPlayerStatus(this.dealer, 'd');
-
-    }
-
-    /* ACTION METHODS */
-    public char hit(Person p) {
-        // draw cards
-        this.deck.dealCardsToPerson(p, 1);
-
-        Hand pHand = p.getHandFromPerson();
-
-        if (pHand.checkBurst()) {
-            return 'b';
-        } else if (pHand.checkTriple7()) {
-            return 's';
-        } else if (pHand.checkDragon()) {
-            return 'd';
-        }
-
-        return 'n'; // n - nothing,
-    }
-
-    public char playerStand(Player player) {
-
-        Hand playerHand = player.getHandFromPerson();
-
-        while (playerHand.getHandScore() < 16) { // default 16 is minStart (NEED TO THINK OF HOW TO PASS IN)
-            // draw card
-            this.deck.dealCardsToPerson(player, 1);
-            playerHand = player.getHandFromPerson();
-        }
-
-        if (playerHand.checkBurst()) {
-            return 'b';
-        } else if (playerHand.checkTriple7()) {
-            return 's';
-        } else if (playerHand.checkDragon()) {
-            return 'd';
-        }
-        // n - nothing,
-        return 'n';
-    }
-
-    public int dealerChallenge() {
-
-        Hand dealerHand = this.dealer.getHandFromPerson();
-
-        // default 16 is minStart (NEED TO THINK OF HOW TO PASS IN)
-        System.out.println("");
-        while (dealerHand.getHandScore() < 16) {
-            // inform player about the auto hit
-            System.out.println("Your handscore is below 16. Auto hit a card!");
-
-            // hit a card
-            char turnOucome = hit(this.dealer);
-            setPlayerLucky(this.dealer, turnOucome);
-            dealerHand = this.dealer.getHandFromPerson();
-
-            // inform player about outcome
-            System.out.println("-- your current handscore is " + dealerHand.getHandScore() + "("
-                    + (getPlayerLucky(this.dealer) == 'n' ? "" : luckyHandMap.get(getPlayerLucky(this.dealer))) + ")");
-
-        }
-        System.out.println("");
-
-        // selecting oppenents
-        List<Player> oppenents = chooseOpponents();
-
-        // challenging oppents
-        for (Player opp : oppenents) {
-            char challengeResult = this.dealer.challenge(opp);
-
-            // set opponent result
-            if (challengeResult == 'w') {
-                setPlayerResult(opp, 'l');
-            } else if (challengeResult == 'l') {
-                setPlayerResult(opp, 'w');
-            } else {
-                setPlayerResult(opp, challengeResult);
-            }
-        }
-
-        // update cash amt
-        updateCashAmt(oppenents);
-
-        // display challenge Result
-        displayChallengeResult(oppenents);
-
-        // if not all players are challenged
-        if (!isAllPlayersChallenged()) {
-            // if dealer hand is not lucky hand or didnt burst
-            if (getPlayerLucky(this.dealer) != 'n') {
-                return -1; // continue challenging
-            }
-            // else, allow dealer to still hit a card
-            return 1; // continue challenging w hit option
-        }
-
-        return 0; // stop challenging
-    }
-
-    public void botDealerChallenge(BotDealer botDealer) {
-
-        Hand dealerHand = this.dealer.getHandFromPerson();
-
-        // hit if hand score < 16
-        while (dealerHand.getHandScore() < 16) {
-            hit(this.dealer);
-            dealerHand = this.dealer.getHandFromPerson();
-        }
-        // track which player is still not challenged
-        List<Player> toChallenge = new ArrayList<>(players);
-
-        // while there are still players to challenge
-        while (toChallenge.size() > 0) {
-            // bot choose opponent
-            Player opp = botDealer.determineChallenge(toChallenge);
-            System.out.println("Dealer challenging " + opp.getName());
-
-            // bot challenge opponent
-            char challengeResult = this.dealer.challenge(opp);
-
-            // set opponent result
-            if (challengeResult == 'w') {
-                setPlayerResult(opp, 'l');
-            } else if (challengeResult == 'l') {
-                setPlayerResult(opp, 'w');
-            } else {
-                setPlayerResult(opp, challengeResult);
-            }
-
-            // display challenge result
-            System.out.println("-- dealer " + resultMap.get(challengeResult) + "\n");
-
-            // remove opponent from tochallengelist
-            toChallenge.remove(opp);
-        }
-
-        // update cash amt
-        updateCashAmt(this.players);
-
-        // End Challenge Method
-    }
-
-    public void dealerChallengeAll() {
-        // challenging oppenents
-        for (Player p : this.players) {
-            char challengeResult = this.dealer.challenge(p);
-
-            // set opponent result
-            if (challengeResult == 'w') {
-                setPlayerResult(p, 'l');
-            } else if (challengeResult == 'l') {
-                setPlayerResult(p, 'w');
-            } else {
-                setPlayerResult(p, challengeResult);
-            }
-        }
-
-        // update cash amt
-        updateCashAmt(this.players);
-    }
-
-    /* CALCULATION METHODS */
-    public void updateCashAmt(List<Player> playerList) {
-        for (Player p : playerList) {
-            int playerBetAmt = p.getBetAmt();
-            // LOSE CASE - player pay dealer
-            if (getPlayerResult(p) == 'l') {
-                p.setCashAmt(p.getCashAmt() - playerBetAmt);
-                this.dealer.setCashAmt(this.dealer.getCashAmt() + playerBetAmt);
-            }
-            // WIN CASE - dealer pay player
-            if (getPlayerResult(p) == 'w') {
-                p.setCashAmt(p.getCashAmt() + playerBetAmt);
-                this.dealer.setCashAmt(this.dealer.getCashAmt() - playerBetAmt);
-            }
-        }
 
     }
 
@@ -400,18 +185,15 @@ public class Round {
     public List<Player> chooseOpponents() {
         // store oppenents
         List<Player> oppenents = new ArrayList<>();
-
+        // track selection status
+        boolean stillSelecting = true; // default true
+        // store dealer hand
         Hand dealerHand = this.dealer.getHandFromPerson();
 
         // Prompt user to select opponent
-        // Scanner sc = new Scanner(System.in);
         displayChallengeOptions(dealerHand);
         int choice = checkForInputException(sc);
-
-        boolean stillSelecting = true; // default true
-
         while (stillSelecting) {
-
             // stop selecing if choice is -1
             if (choice == -1) {
                 // if some players were chosen, end the selection
@@ -485,7 +267,7 @@ public class Round {
                     turnOutcome = hit(player);
                     break;
                 case 2: // stand
-                    turnOutcome = playerStand(player);
+                    turnOutcome = stand(player);
                     break;
                 default:
                     System.out.println("Please enter a choice between 1 and 2.\n");
@@ -496,16 +278,168 @@ public class Round {
         return turnOutcome;
     }
 
+    public void promptHumanDealer() {
+        char turnOutcome = 'n';
+        boolean challenging = !isAllPlayersChallenged();
+        int choice;
+        do {
+            displayDealerTurnOptions(this.dealer.getHandFromPerson());
+            choice = checkForInputException(sc);
+
+            switch (choice) {
+                case 1:
+                    turnOutcome = hit(this.dealer);
+                    break;
+                case 2:
+                    turnOutcome = stand(this.dealer);
+                    if (turnOutcome == 'n') {
+                        List<Player> oppenents = chooseOpponents();
+                        dealerChallenge(oppenents);
+                        challenging = !isAllPlayersChallenged();   
+                    }
+                    System.out.println("c=" + challenging + ", to=" + turnOutcome);
+                    break;
+                default:
+                    System.out.println("Please enter a choice between 1 and 2.\n");
+            }
+
+        } while ((choice != 1 && choice != 2) || (turnOutcome == 'n' && challenging));
+
+        // auto challenge
+        if (turnOutcome != 'n' && challenging) {
+            if (choice == 1) {
+                displayTurnResult(turnOutcome, this.dealer);
+            }  
+            setPlayerLucky(this.dealer, turnOutcome);
+            List<Player> oppenents = this.players.stream().filter(p -> getPlayerResult(p) == 'c')
+                    .collect(Collectors.toList());
+            dealerChallenge(oppenents);
+        }
+
+    }
+
+    /* ACTION METHODS */
+    public char hit(Person p) {
+        // draw cards
+        this.deck.dealCardsToPerson(p, 1);
+        return checkForLuckyHand(p);
+    }
+
+    public char stand(Person p) {
+
+        Hand pHand = p.getHandFromPerson();
+
+        while (pHand.getHandScore() < 16) { // default 16 is minStart (NEED TO THINK OF HOW TO PASS IN)
+            // inform player about the auto hit
+            System.out.println("Your handscore is below 16. Auto hit a card!");
+
+            // hit a card
+            char turnOucome = hit(p);
+            setPlayerLucky(p, turnOucome);
+            pHand = p.getHandFromPerson();
+
+            // inform player about outcome
+            System.out.println("-- your current handscore is " + pHand.getHandScore() + "("
+                    + (getPlayerLucky(p) == 'n' ? "" : luckyHandMap.get(getPlayerLucky(p))) + ")");
+            System.out.println(pHand.displayOpenHand());
+        }
+
+        return checkForLuckyHand(p);
+    }
+
+    public void botDealerChallenge(BotDealer botDealer) {
+
+        Hand dealerHand = this.dealer.getHandFromPerson();
+
+        // hit if hand score < 16
+        while (dealerHand.getHandScore() < 16) {
+            hit(this.dealer);
+            dealerHand = this.dealer.getHandFromPerson();
+        }
+        // track which player is still not challenged
+        List<Player> toChallenge = new ArrayList<>(players);
+
+        // while there are still players to challenge
+        while (toChallenge.size() > 0) {
+            // bot choose opponent
+            Player opp = botDealer.determineChallenge(toChallenge);
+            System.out.println("Dealer challenging " + opp.getName());
+
+            // bot challenge opponent
+            char challengeResult = this.dealer.challenge(opp);
+
+            // set opponent result
+            if (challengeResult == 'w') {
+                setPlayerResult(opp, 'l');
+            } else if (challengeResult == 'l') {
+                setPlayerResult(opp, 'w');
+            } else {
+                setPlayerResult(opp, challengeResult);
+            }
+
+            // display challenge result
+            System.out.println("-- dealer " + resultMap.get(challengeResult) + "\n");
+
+            // remove opponent from tochallengelist
+            toChallenge.remove(opp);
+        }
+
+        // update cash amt
+        updateCashAmt(this.players);
+
+        // End Challenge Method
+    }
+
+    public void dealerChallenge(List<Player> oppenents) {
+        // challenging oppenents
+        for (Player opp : oppenents) {
+            char challengeResult = this.dealer.challenge(opp);
+
+            // set opponent result
+            if (challengeResult == 'w') {
+                setPlayerResult(opp, 'l');
+            } else if (challengeResult == 'l') {
+                setPlayerResult(opp, 'w');
+            } else {
+                setPlayerResult(opp, challengeResult);
+            }
+        }
+
+        // update cash amt
+        updateCashAmt(oppenents);
+
+        // display challenge Result
+        displayChallengeResult(oppenents);
+    }
+
+    /* CALCULATION METHODS */
+    public void updateCashAmt(List<Player> playerList) {
+        for (Player p : playerList) {
+            int playerBetAmt = p.getBetAmt();
+            // LOSE CASE - player pay dealer
+            if (getPlayerResult(p) == 'l') {
+                p.setCashAmt(p.getCashAmt() - playerBetAmt);
+                this.dealer.setCashAmt(this.dealer.getCashAmt() + playerBetAmt);
+            }
+            // WIN CASE - dealer pay player
+            if (getPlayerResult(p) == 'w') {
+                p.setCashAmt(p.getCashAmt() + playerBetAmt);
+                this.dealer.setCashAmt(this.dealer.getCashAmt() - playerBetAmt);
+            }
+        }
+
+    }
+
     /* DISPLAY METHODS */
     public void displayPlayerTurnOptions(Hand playerHand) {
 
         String handStr = "Your Hand: \n" + playerHand.displayOpenHand();
-
-        displayHeading("Your Turn (Player)", '=', handStr.length());
-        displayTable(handStr.length());
-        displayHoriLine('-', handStr.length(), '\n');
+        // System.out.println(handStr.indexOf("_\n") + "vs" + handStr.length());
+        displayHeading("Your Turn (Player)", '=', handStr.indexOf("_\n"));
+        displayTable(handStr.indexOf("_\n"));
+        displayHoriLine('-', handStr.indexOf("_\n"), '\n');
         System.out.println(handStr);
-        displayHoriLine('-', handStr.length(), '\n');
+        displayHoriLine('-', handStr.indexOf("_\n"), '\n');
         System.out.println("1. Hit");
         System.out.println("2. Stand");
         System.out.print("Please enter your choice: ");
@@ -515,11 +449,11 @@ public class Round {
 
         String handStr = "Your Hand: \n" + dealerHand.displayOpenHand();
 
-        displayHeading("Your Turn (Dealer)", '=', handStr.length());
-        displayRemainingTable(handStr.length());
-        displayHoriLine('-', handStr.length(), '\n');
+        displayHeading("Your Turn (Dealer)", '=', handStr.indexOf('\n'));
+        displayRemainingTable(handStr.indexOf("_\n"));
+        displayHoriLine('-', handStr.indexOf("_\n"), '\n');
         System.out.println(handStr);
-        displayHoriLine('-', handStr.length(), '\n');
+        displayHoriLine('-', handStr.indexOf("_\n"), '\n');
         System.out.println("1. Hit");
         System.out.println("2. Challenge");
         System.out.print("Please enter your choice: ");
@@ -541,7 +475,7 @@ public class Round {
     public void displayTable(int headingLength) {
         displayHeading("table", '-', headingLength);
         // Print Dealer
-        if (this.dealer instanceof BotDealer) {
+        if (dealer instanceof BotDealer) {
             System.out.println("1. Dealer " + this.dealer.getHandFromPerson().displayCloseHand());
         }
         // // Print Players
@@ -559,8 +493,7 @@ public class Round {
         // // Print Players
         for (int i = 0; i < players.size(); i++) {
             if (getPlayerResult(players.get(i)) == 'c') {
-                System.out.println((i + 1) + ". " + players.get(i).getName() + " "
-                        + players.get(i).getHandFromPerson().displayCloseHand());
+                System.out.println((i+1) + ". " + players.get(i).getName() + " " + players.get(i).getHandFromPerson().displayCloseHand());
             }
         }
     }
@@ -576,6 +509,10 @@ public class Round {
             if ((p instanceof Player) && !(p instanceof BotPlayer)) {
                 // display player result + cash amt
                 System.out.println("YOU " + resultMap.get(getPlayerResult(p)) + "!");
+                System.out.println("Dealer Hand:");
+                System.out.println(this.dealer.getHandFromPerson().displayOpenHand());
+                System.out.println("Your Hand:");
+                System.out.println(p.getHandFromPerson().displayOpenHand());
                 System.out.println("current cash amount: " + p.getCashAmt());
             }
             // if human is dealer
@@ -587,11 +524,11 @@ public class Round {
                             .println(i + "." + player.getName() + " (" + resultMap.get(getPlayerResult(player)) + ")");
                     i++;
                 }
-                System.out.println("\n your current cash amount: " + p.getCashAmt());
+                System.out.println("\nYour current cash amount: " + p.getCashAmt());
             }
 
         }
-        System.out.println("HOPE YOU HAD FUN!!! :D");
+        System.out.println("");
     }
 
     public void displayChallengeResult(List<Player> oppenents) {
@@ -604,6 +541,43 @@ public class Round {
         }
         System.out.println("Your current cash amount: " + this.dealer.getCashAmt());
         promptEnterKey(); // prompt player to press enter key to proceed
+    }
+
+    public void displayTurnResult(char turnOutcome, Person player) {
+        if (turnOutcome != 'n') {
+            if (player instanceof BotPlayer) {
+                System.out.println(player.getName() + " " + (turnOutcome != 'b' ? "GOT" : "")
+                        + luckyHandMap.get(turnOutcome) + "!\n");
+            } else {
+                displayHeading("Your Hand", '=', 25);
+                System.out.println(player.getHandFromPerson().displayOpenHand());
+                System.out.println("\nYOU " + (turnOutcome != 'b' ? "GOT" : "") + luckyHandMap.get(turnOutcome) + "!");
+                promptEnterKey(); // prompt player to press enter key to proceed
+            }
+        }
+    }
+
+    /* HELPER METHODS */
+    public void promptEnterKey() {
+        // Scanner sc = new Scanner(System.in);
+        System.out.print("Press \"ENTER\" to continue...");
+        try {
+            sc.nextLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void displayHoriLine(char chara, int noOfChara, char endChara) {
+        System.out.print(("" + chara).repeat(noOfChara) + endChara);
+    }
+
+    public void displayHeading(String title, char chara, int length) {
+        int charlength = (length - title.length() - 2) / 2;
+
+        String heading = ("" + chara).repeat(charlength) + " " + title + " " + ("" + chara).repeat(charlength);
+        System.out.println(heading);
+
     }
 
     /* HELPER METHODS */
@@ -635,7 +609,7 @@ public class Round {
 
     // Check if all players were challenged
     public boolean isAllPlayersChallenged() {
-        for (Person p : playersResult.keySet()) {
+        for (Player p : this.players) {
             if (getPlayerResult(p) == 'c') {
                 return false;
             }
@@ -694,29 +668,6 @@ public class Round {
         return info[1];
     }
 
-    // UI
-    public void promptEnterKey() {
-        // Scanner sc = new Scanner(System.in);
-        System.out.print("Press \"ENTER\" to continue...");
-        try {
-            sc.nextLine();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void displayHoriLine(char chara, int noOfChara, char endChara) {
-        System.out.print(("" + chara).repeat(noOfChara) + endChara);
-    }
-
-    public void displayHeading(String title, char chara, int length) {
-        int charlength = (length - title.length() - 2) / 2;
-
-        String heading = ("" + chara).repeat(charlength) + " " + title + " " + ("" + chara).repeat(charlength);
-        System.out.println(heading);
-
-    }
-
     public int checkForInputException(Scanner sc) {
         try {
             int choice = sc.nextInt();
@@ -739,4 +690,5 @@ public class Round {
             e.printStackTrace();
         }
     }
+
 }
