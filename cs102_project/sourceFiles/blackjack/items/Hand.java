@@ -118,7 +118,7 @@ public class Hand {
         // Loop through each card in the hand
         for (Card c : this.hand) {
             // Construct the top border of the card
-            content.append("\t_________");
+            content.append("\t_____");
         }
         content.append("\n");
     
@@ -126,17 +126,17 @@ public class Hand {
         for (Card c : this.hand) {
             // Construct the rank line of the card
             content.append("\t|");
-            content.append(String.format("%-4s", c.getCardValue())); // Left-align the rank
-            content.append("\t| ");
+            content.append(String.format("%-3s", c.getCardValue().charAt(0))); // Left-align the rank
+            content.append("| ");
     
         }
-        content.append("\n" + "\n");
+        content.append("\n");
     
         // Loop through each card in the hand
         for (Card c : this.hand) {
 
             // Construct the suit line of the card
-            content.append("\t|   ");
+            content.append("\t| ");
             char suitSymbol;
             switch (c.getCardSuit()) {
                 case "Diamond":
@@ -156,18 +156,18 @@ public class Hand {
                     break;
             }
             content.append(suitSymbol);
-            content.append("   | ");
+            content.append(" | ");
         }
-        content.append("\n" + "\n");
+        content.append("\n");
     
         // Loop through each card in the hand
         for (Card c : this.hand) {
             // Construct the bottom border of the card
-            content.append("\t|_______| ");
+            content.append("\t|___| ");
         }
         content.append("\n");
     
-        content.append("\n: " + this.getHandScore());
+        content.append("\n total score: " + this.getHandScore());
     
         return content.toString();
     }

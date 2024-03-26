@@ -75,7 +75,7 @@ public class Game {
     public void endRound(Round r) {
 
        if (!r.isAllPlayersChallenged()) {
-            r.dealerChallengeAll();
+            r.dealerChallenge(this.players);
        }
 
        r.displayRoundResult();
