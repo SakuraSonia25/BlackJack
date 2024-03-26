@@ -13,7 +13,7 @@ public class Menu {
 
     public void displayMain() {
         System.out.println("==== Start Menu ====");
-        System.out.println("1. Single Player");
+        System.out.println("1. Start Game");
         System.out.println("2. Read Rules");
         System.out.println("3. End Program");
         System.out.print("Please enter your choice:");
@@ -153,6 +153,29 @@ public class Menu {
             Round r = g.startRound();
             g.endRound(r);
 
+            //Check if the players are bankrupt
+            for (Player p : playerList) {
+                if (!(p instanceof BotPlayer) && g.isHumanBankrupt(p)) {
+                    //end game
+                    System.out.println("You Lost the Game!");
+                    System.out.println("----- END GAME -----");
+                    System.out.println();
+                    this.MainOptions();
+                }
+            }
+
+            g.removeBankruptPlayers();
+
+            //check if dealer is bankrupt
+            if (g.isDealerBankrupt()) {
+                System.out.println("Congratulations! You Won the Game!");
+                System.out.println("----- END GAME -----");
+                System.out.println();
+                this.MainOptions(); // End the game after printing the result
+            }
+
+            
+
             /* =========================================================== *
              * Prompt user whether they want to continue to the next round *
              * or end the Game prematurely (Game ends automatically at the *
@@ -225,6 +248,24 @@ public class Menu {
             System.out.println("===== ROUND " + roundNo + "/10 =====");
             Round r = g.startRound();
             g.endRound(r);
+
+            // Check for bankrupt players
+            g.removeBankruptPlayers();
+            
+            if (playerList.size() == 0) {
+                System.out.println("Congratulations! You Won the Game!");
+                System.out.println("----- END GAME -----");
+                System.out.println();
+                this.MainOptions();
+            }
+
+            //check if dealer is bankrupt
+            if (g.isDealerBankrupt()) {
+                System.out.println("You Lost the Game!");
+                System.out.println("----- END GAME -----");
+                System.out.println();
+                this.MainOptions(); 
+            }
 
             /* =========================================================== *
                 * Prompt user whether they want to continue to the next round *

@@ -42,24 +42,30 @@ public class Dealer extends Person{
         //     return false;
         // }
 
-        // dealer got luckyhand
-        if (hand.checkBlackjack() || hand.checkDragon() || hand.checkTriple7()){
-            // dealer win
-            if (!(opponentHand.checkBlackjack() || opponentHand.checkDragon() || opponentHand.checkTriple7()) || opponentHand.checkBurst()) {
-                return 'w';
-            }
-        } else {
-            // dealer lose
-            if ((opponentHand.checkBlackjack() || opponentHand.checkDragon() || opponentHand.checkTriple7()) || opponentHandScore < handScore) {
+        // Compare luckyhand
+        if (hand.checkSpecialHands() && !(opponentHand.checkSpecialHands())){
+            return 'w';
+        } 
+        else if (hand.checkSpecialHands() && opponentHand.checkSpecialHands()) {
+            return 'd';
+        }
+        else {
+            if (opponentHand.checkSpecialHands()) {
                 return 'l';
             } 
-            // dealer win
-            else if (opponentHand.checkBurst() && !hand.checkBurst()) {
-                return 'w';
-            }
         }
-        
-        return 'd';
+
+        //check normal cards
+        if (handScore == opponentHandScore || (hand.checkBurst() && opponentHand.checkBurst())) {
+            return 'd';
+        }
+        else if (handScore > opponentHandScore && !hand.checkBurst()) {
+            return 'w';
+        }
+        else if (opponentHand.checkBurst()) {
+            return 'w'; 
+        }
+        return 'l';
     }
     
 }

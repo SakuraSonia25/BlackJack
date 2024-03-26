@@ -4,6 +4,7 @@ import java.util.*;
 
 import blackjack.players.*;
 import blackjack.items.*;
+import blackjack.menus.*;;
 
 public class Game {
 
@@ -31,19 +32,32 @@ public class Game {
         this.dealer = dealer;
     }
 
+    public int getBetAmount(Player p) {
+        int betAmt = 0;
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter bet amt or 'A' for all-in: ");
+        String answer = sc.next();
+        if (answer.equals("A")) {
+            betAmt = p.getCashAmt();
+            System.out.println("Bet Amt: " + p.getCashAmt());
+        }
+        else {
+            betAmt = Integer.parseInt(answer);
+        }
+        return betAmt;
+    }
+
     // public void startRound() {
     public Round startRound() {
         Deck d = new Deck();
         int betAmt = 500;
         for (Player p : this.getPlayers()) {
             if (!(p instanceof BotPlayer)) {
-                Scanner sc = new Scanner(System.in);
-                System.out.println("Enter bet amt: ");
-                betAmt = sc.nextInt();
+                betAmt = this.getBetAmount(p);
 
-                while (betAmt > 5000 || betAmt > p.getCashAmt()) {
-                    System.out.println("Too high. Enter bet amt: ");
-                    betAmt = sc.nextInt();
+                while (betAmt > p.getCashAmt()) {
+                    System.out.println("Too high");
+                    betAmt = this.getBetAmount(p);
                 }
             }
             else {
@@ -61,7 +75,7 @@ public class Game {
         Round r = new Round(d, getPlayers(), getDealer());
         
         //check lucky cards
-        boolean dealerLuck = r.hvStartingLuckyHand(getDealer());
+        boolean dealerLuck = this.dealer.getHandFromPerson().checkSpecialHands();
         if (!dealerLuck) {
             //implement each turn
             for (Player p : getPlayers()) {
@@ -78,7 +92,7 @@ public class Game {
             r.dealerChallenge(this.players);
        }
 
-       r.displayRoundResult();
+       RoundDisplay.displayRoundResult(this.players, this.dealer);
     }
 
     public Map<String, Integer> displayOverallGameResults() {
