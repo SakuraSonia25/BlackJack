@@ -5,12 +5,12 @@ import java.util.*;
 
 public class Person {
 
-    //Atributes
+    // Atributes
     private String name;
     private int cashAmt;
     private Hand hand;   //Need import statement
 
-    //Constructor
+    // Constructor
     public Person(String name, int cashAmt, Hand hand) {
         this.name = name;
         this.cashAmt = cashAmt;

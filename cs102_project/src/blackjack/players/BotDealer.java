@@ -1,9 +1,9 @@
 package blackjack.players;
 
-import blackjack.items.*;
+import java.util.*;
+import java.io.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import blackjack.items.*;
 
 public class BotDealer extends Dealer {
 
@@ -14,8 +14,9 @@ public class BotDealer extends Dealer {
     // for dealer to choose when to hit or challenge
     public boolean determineHit() {
 
+        // pause to imitate thinking between each action
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -35,8 +36,9 @@ public class BotDealer extends Dealer {
     // for dealer to choose who to challenge
     public Player determineChallenge(List<Player> listOfPlayers) {
 
+        //pause to imitate thinking between each action
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -71,8 +73,7 @@ public class BotDealer extends Dealer {
             numberofAces--;
         }
 
-        return hasAce && totalValue <= 21;
-        
+        return hasAce && totalValue <= 21; 
     }
 
     private boolean handlePair() {
@@ -89,6 +90,21 @@ public class BotDealer extends Dealer {
 
     private boolean handleSoftHand() {
         int handScore = super.getHandScore();
+        int aceCount = 0; //counter for aces in hand
+
+        for (Card c : super.getHandFromPerson().getHand()) {
+            if (c.getCardValue().equals("Ace")) {
+                aceCount++;
+            }
+        }
+
+        // check if bot has Ace and no double ace
+        boolean hasAce = super.getHandFromPerson().checkForAcesCard() && aceCount == 1;
+
+        // update the value of Ace
+        if (hasAce) {
+            handScore = handScore - 11 + chooseAceValue();
+        }
 
         // bot will be more aggressive as it has the flexibility of the Ace
         return handScore < 19;
@@ -148,5 +164,44 @@ public class BotDealer extends Dealer {
         }
 
         return mostCardsPlayer;
+    }
+
+    // Method to choose Ace value
+    public int chooseAceValue() {
+        int handScore = super.getHandScore();
+        int handValueWith11 = handScore;
+        int handValueWith10 = handScore - 1;
+        int handValueWith1 = handScore - 10;
+
+        if (handValueWith11 <= 21) {
+            return 11;
+        } else if (handValueWith1 <= 21) {
+            return 1;
+        } else {
+
+            // If both cause the hands to bust, choose 10
+            return 10;
+        }
+    }
+
+    // Method to pull random reaction for bot
+    public String getDealerRandomReaction() {
+        List<String> reactions = new ArrayList<>();
+
+        String filePath = "src/blackjack/players/dealer.txt";
+
+        try (Scanner sc = new Scanner(new File(filePath))) {
+            String line;
+            while (sc.hasNextLine()) {
+                line = sc.nextLine();
+                reactions.add(line);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Random random = new Random();
+        int index = random.nextInt(reactions.size());
+        return reactions.get(index);
     }
 }
