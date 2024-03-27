@@ -72,6 +72,7 @@ The human player is allowed to choose if he/she wants to take the role of the de
   |-- run.bat  
 
 ## UML
+https://viewer.diagrams.net/?tags=%7B%7D&highlight=0000ff&edit=_blank&layers=1&nav=1&page-id=JNRQ3Mruw2Z1RfvKf6q3#G1z208zJpMzq8ww5uSWisVAwfuPigA1K7M
 
 ## Classes
 1.package items

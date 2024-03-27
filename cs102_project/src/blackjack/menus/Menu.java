@@ -17,7 +17,7 @@ public class Menu {
 
     //Display the main menu of the game
     public void displayMain() {
-        // System.out.println("\033[H\033[2J"); //This code clears the terminal
+
         System.out.println(ANSI_CYAN + "==== Start Menu ====" + ANSI_RESET);
         System.out.println("1. Start Game");
         System.out.println("2. Read Rules");
@@ -104,13 +104,10 @@ public class Menu {
             }
 
         } while (choice != 3);
-        // scanner.close();
-        // VERY IMPORTANT TO ONLY CLOSE SCANNER HERE
     }
 
     //Game menu displayed after human chooses option 1
     public void displayGame() {
-        // System.out.println("\033[H\033[2J"); //Code to clear terminal from start to where cursor is now
         System.out.println(ANSI_CYAN + "==== Game Menu ====" + ANSI_RESET);
         System.out.println("1. Play as Player");
         System.out.println("2. Play as Dealer");
@@ -151,11 +148,34 @@ public class Menu {
         } while (choice < 1 || choice > 3);
     }
 
+    public int getCashAmtFromHuman() {
+        Scanner sc = new Scanner(System.in);
+        int cashAmt = 0;
+        while (true) {
+            try {
+                System.out.print("\nEnter starting cash amount ($1000 to $10,000): ");
+                cashAmt = sc.nextInt();
+
+                if (cashAmt >= 1000 && cashAmt <= 10000) {
+                    break;
+                }
+                System.out.println("Please enter an integer value between 1000 and 10,000.");
+            }
+            catch (InputMismatchException e) {
+                System.out.println("Please enter an integer value between 1000 and 10,000.");
+                sc.next(); // Discard invalid input
+            }
+        }
+        return cashAmt;
+    }
+
     public void startPlayerGame(String name) {
         // Values you get from mainManu
-        int cashAmt = 5000; //fixed
         int numOfPlayers = 4; //fixed
         boolean isDealer = false;
+
+        //Get cash amount from player
+        int cashAmt = this.getCashAmtFromHuman();
         
         // Generate players and dealer 
         List<Player> playerList = new ArrayList<>();
@@ -192,7 +212,6 @@ public class Menu {
         //implement game
         do {
 
-            // System.out.println("\033[H\033[2J"); //Clear terminal
             System.out.println(ANSI_CYAN + "===== ROUND " + roundNo + "/10 =====" + ANSI_RESET);
             Round r = g.startRound();
             g.endRound(r);
@@ -255,9 +274,11 @@ public class Menu {
 
     public void startDealerGame(String name) {
         // Values you get from mainManu
-        int cashAmt = 5000;
         int numOfPlayers = 4;
         boolean isDealer = true;
+
+        //Get cash amount from player
+        int cashAmt = this.getCashAmtFromHuman();
         
         // Generate players and dealer 
         List<Player> playerList = new ArrayList<>();
@@ -295,7 +316,7 @@ public class Menu {
         //implement game
 
         do {
-            // System.out.println("\033[H\033[2J"); //Clear the terminal
+
             System.out.println(ANSI_CYAN + "\n===== ROUND " + roundNo + "/10 =====" + ANSI_RESET);
             Round r = g.startRound();
             g.endRound(r);
@@ -327,7 +348,7 @@ public class Menu {
 
             String userInput = "";
             boolean validInput = false;
-            while (!validInput && roundNo < 10) {
+            while (!validInput && roundNo <= 10) {
                 try {
                     System.out.print("Would you like to continue? (y/n): ");
                     userInput = scanner.nextLine().toLowerCase().trim(); // Convert input to lowercase for case-insensitive comparison
@@ -349,7 +370,7 @@ public class Menu {
 
             roundNo++;
 
-        } while (roundNo < 10);
+        } while (roundNo <= 10);
 
         // display overall game result
         g.displayOverallGameResults(RoundDisplay.findHuman());
@@ -359,160 +380,4 @@ public class Menu {
     
 }
 
-        
-        
-        // String choice = "no";
-        // for (int i = 0; i < 10; i++) {
-        //     while ( !(choice.equals("yes") || g.isDealerBankrupt()) ) {
-        //         Round r = g.startRound();
-        //         g.endRound(r);
-
-        //         //ask player if continue
-        //         System.out.print("Do you want to end the game? (yes/no)");
-        //         choice = scanner.nextLine();
-        //     }
-        // }
-        // if (choice.equals("yes")) {
-        //     g.terminateGame(choice);
-        // }
-
-    //     int startingCashAmt = 500; // Customizable when time allows
-
-    //     List<Player> players = new ArrayList<>();
-
-    //     Player humanPlayer = new Player(name, startingCashAmt);
-    //     // Tell durga to make constructor without hand parameter
-
-    //     players.add(humanPlayer);
-    //     players.add(new BotPlayer("Bot Player 1", startingCashAmt));
-    //     players.add(new BotPlayer("Bot Player 2", startingCashAmt));
-    //     players.add(new BotPlayer("Bot Player 3", startingCashAmt));
-        
-    //     Game game = new Game(players, new BotDealer("Dealer", startingCashAmt));
-    //     Deck deck = new Deck();
-    //     int roundNo = 1;
-
-    //     do {
-    //         System.out.println("===== ROUND " + roundNo + "/10 =====");
-    //         Round round = new Round(deck);
-    //         game.startRound();
-
-    //         /* =========================================================== *
-    //          * Prompt user whether they want to continue to the next round *
-    //          * or end the Game prematurely (Game ends automatically at the *
-    //          * 10th round)                                                 *
-    //          * =========================================================== */ 
-            
-    //         System.out.println("ROUND HAPPENING THINGAMGI");
-
-    //         String userInput = "";
-    //         boolean validInput = false;
-    //         while (!validInput && roundNo < 10) {
-    //             try {
-    //                 System.out.print("Would you like to continue? (y/n): ");
-    //                 userInput = scanner.nextLine().toLowerCase().trim(); // Convert input to lowercase for case-insensitive comparison
-    //                 if (userInput.equals("y") || userInput.equals("n")) {
-    //                     validInput = true;
-    //                 } else {
-    //                     throw new IllegalArgumentException("Invalid input. Please enter 'y' or 'n'\n");
-    //                 }
-    //             } catch (IllegalArgumentException e) {
-    //                 System.out.println(e.getMessage());
-    //             }
-    //         }
-            
-    //         if (userInput.equals("n")) {
-    //             break; // Exit the loop if user chooses not to continue
-    //         }
-
-    //         roundNo++;
-
-    //     } while (roundNo < 10);
-
-    //     game.displayOverallGameResult();
-    // }
-
-//     public void startDealerGame(String name) {
-//         int startingCashAmt = 500; // Customizable when time allows
-
-//         List<Player> players = new ArrayList<>();
-
-//         Player humanPlayer = new Player(name, startingCashAmt);
-//         // Tell durga to make constructor without hand parameter
-
-//         players.add(humanPlayer);
-//         players.add(new BotPlayer("Bot Player 1", startingCashAmt));
-//         players.add(new BotPlayer("Bot Player 2", startingCashAmt));
-//         players.add(new BotPlayer("Bot Player 3", startingCashAmt));
-        
-//         Game game = new Game(players, new Dealer("Dealer", startingCashAmt));
-//         Deck deck = new Deck();
-//         int roundNo = 1;
-
-//         do {
-//             System.out.println("===== ROUND " + roundNo + "/10 =====");
-//             // Round round = new Round(deck);
-//             // game.startRound();
-//             // // Shuffle cards in deck
-//             // // Give out cards from deck
-//             // // Set hands of players
-//             // // Check for lucky hands
-
-//             // List<Player> luckyPlayers = new ArrayList<>();
-//             // luckyPlayers = round.getAllLuckyHandPlayers();
-
-//             // if (game.isDealerBankrupt()) {
-//             //     // Print something?
-//             //     break;
-//             // }
-
-//             // round.playerTurn();
-
-//             // round.displayRoundStatus();
-
-//             // round.computeResults();
-
-//             // round.displayPlayerResult();
-
-//             // round.removeBankruptPlayers();
-
-//             // if (game.isHumanBankrupt()) {
-//             //     // Print something?
-//             //     break;
-//             // }
-
-//             /* =========================================================== *
-//              * Prompt user whether they want to continue to the next round *
-//              * or end the Game prematurely (Game ends automatically at the *
-//              * 10th round)                                                 *
-//              * =========================================================== */ 
-            
-//             System.out.println("ROUND HAPPENING THINGAMGI");
-
-//             String userInput = "";
-//             boolean validInput = false;
-//             while (!validInput && roundNo < 10) {
-//                 try {
-//                     System.out.print("Would you like to continue? (y/n): ");
-//                     userInput = scanner.nextLine().toLowerCase().trim(); // Convert input to lowercase for case-insensitive comparison
-//                     if (userInput.equals("y") || userInput.equals("n")) {
-//                         validInput = true;
-//                     } else {
-//                         throw new IllegalArgumentException("Invalid input. Please enter 'y' or 'n'\n");
-//                     }
-//                 } catch (IllegalArgumentException e) {
-//                     System.out.println(e.getMessage());
-//                 }
-//             }
-            
-//             if (userInput.equals("n")) {
-//                 break; // Exit the loop if user chooses not to continue
-//             }
-
-//             roundNo++;
-
-//         } while (roundNo < 10);
-
-//         game.displayOverallGameResult();
-//     }
-// }
+    

@@ -94,7 +94,7 @@ public class RoundDisplay {
     // Player Option Menu
     public static void displayPlayerTurnOptions(Hand playerHand, Dealer dealer, List<Player> players) {
 
-        String handStr = "Your Hand: \n" + ANSI_GREEN + playerHand.displayOpenHand() + ANSI_RESET;
+        String handStr = "Your Hand: \n" + ANSI_GREEN + playerHand.displayOpenHand(false) + ANSI_RESET;
         int handStrlen = handStr.indexOf("_\n") + 1;
         // heading
         System.out.println("");
@@ -113,7 +113,7 @@ public class RoundDisplay {
     // Dealer Option Menu
     public static void displayDealerTurnOptions(Hand dealerHand, List<Player> players) {
 
-        String handStr = "Your Hand: \n" + ANSI_GREEN + dealerHand.displayOpenHand() + ANSI_RESET;
+        String handStr = "Your Hand: \n" + ANSI_GREEN + dealerHand.displayOpenHand(false) + ANSI_RESET;
         int handStrlen = handStr.indexOf("_\n") + 1;
         // heading
         System.out.println("");
@@ -132,7 +132,7 @@ public class RoundDisplay {
     // Dealer - Choose Opponent Option Menu
     public static void displayChallengeOptions(Hand dealerHand, List<Player> players) {
 
-        String handStr = "Your Hand: \n" + ANSI_GREEN + dealerHand.displayOpenHand() + ANSI_RESET;
+        String handStr = "Your Hand: \n" + ANSI_GREEN + dealerHand.displayOpenHand(false) + ANSI_RESET;
         int handStrlen = handStr.indexOf("_\n") + 1;
         // heading
         System.out.println("");
@@ -215,11 +215,11 @@ public class RoundDisplay {
             System.out.println("\nResult: YOU " + resultMap.get(getPlayerResult(p)) + " THE ROUND!");
             // dealer hand
             System.out.println("Dealer Hand:");
-            System.out.println(ANSI_GREEN + dealer.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+            System.out.println(ANSI_GREEN + dealer.getHandFromPerson().displayOpenHand(false) + ANSI_RESET);
             System.out.println();
             // player hand
             System.out.println("Your Hand:");
-            System.out.println(ANSI_GREEN + p.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+            System.out.println(ANSI_GREEN + p.getHandFromPerson().displayOpenHand(false) + ANSI_RESET);
             // player cash amt
             System.out.println(String.format("Your current cash amount: %s",(p.getCashAmt() <= 0 ? ANSI_RED + "$" + p.getCashAmt() + "(Bankrupt)" + ANSI_RESET : "$" + p.getCashAmt())));
         }
@@ -240,7 +240,7 @@ public class RoundDisplay {
         int i = 1;
         for (Player opp : oppenents) {
             System.out.println(i + "." + opp.getName() + " " + resultMap.get(getPlayerResult(opp)));
-            System.out.println(ANSI_GREEN + opp.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+            System.out.println(ANSI_GREEN + opp.getHandFromPerson().displayOpenHand(false) + ANSI_RESET);
             i++;
         }
         // display dealer cash amount
@@ -259,8 +259,7 @@ public class RoundDisplay {
                 // hand burst or got lucky hand
                 if (turnOutcome != 'n') {
                     // print hand outcome + hand  
-                    System.out.println("\n" + player.getName() + (turnOutcome != 'b' ? " GOT " + luckyHandMap.get(turnOutcome) + "!": luckyHandMap.get(turnOutcome) + "!"));
-                    displayHandStr(player);
+                    System.out.println("\n" + player.getName() + (turnOutcome != 'b' ? " GOT " + luckyHandMap.get(turnOutcome) + "!": " " +luckyHandMap.get(turnOutcome) + "!"));
                 } 
                 // normal hand
                 else {
@@ -277,7 +276,7 @@ public class RoundDisplay {
         else {
             if (turnOutcome != 'n') {
                 System.out.println(ANSI_CYAN + "\n OMGGG YOU " + (turnOutcome != 'b' ? "GOT " + luckyHandMap.get(turnOutcome) + "!(~ ' 3 ')~": luckyHandMap.get(turnOutcome) + "! ( T _ T )" + ANSI_RESET));
-                displayHandStr(player);
+                displayHandStr(player, false);
                 promptEnterKey(); // prompt player to press enter key to proceed
             } else {
                 System.out.println(ANSI_CYAN + "Your turn ends!\n" + ANSI_RESET);
@@ -288,13 +287,13 @@ public class RoundDisplay {
 
     /* Helper Methods */
 
-    public static void displayHandStr(Person p) { 
+    public static void displayHandStr(Person p, boolean hasAce) { 
         // using the hand str to calculate length of heading
-        String handStr = "Your Hand: \n" + p.getHandFromPerson().displayOpenHand(); 
+        String handStr = "Your Hand: \n" + p.getHandFromPerson().displayOpenHand(false); 
         int handStrlen = handStr.indexOf("_\n") + 1;
 
         displayHeading("Your Hand", '-', handStrlen);
-        System.out.println(ANSI_GREEN + p.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+        System.out.println(ANSI_GREEN + p.getHandFromPerson().displayOpenHand(hasAce) + ANSI_RESET);
     }
 
     public static void promptEnterKey() {

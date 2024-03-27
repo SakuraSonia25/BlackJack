@@ -101,32 +101,5 @@ public class Card {
         return content.toString();
     }
 
-    // @Override
-    // public String toString() {
-    //     return "Card [value=" + value + ", suit=" + suit + ", score=" + score + "]";
-    // }
-
-    // // Dealer's side
-    // public int drawAce(int totalHand, int totalHandScore) {
-        //     if (totalHand == 2) {
-            //         if (totalHandScore + 11 <= 21) {
-    //             totalHandScore += 11;
-    //         } 
-    //         else if (totalHandScore + 10 <= 21) {
-    //             totalHandScore += 10;
-    //         }
-    //         else {
-    //             totalHandScore += 1; // Ace counts as 1
-    //         }
-    //     } else if (numCards == 3) {
-    //         if (totalHandScore + 10 <= 21) {
-    //             totalHandScore += 10;
-    //         } else {
-    //             totalHandScore += 1; // Ace counts as 1
-    //         }
-    //     }
-    //     else {
-    //         return totalHandScore += 1;
-    //     }
-    // }
+    
 }

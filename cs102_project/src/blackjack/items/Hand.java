@@ -135,7 +135,7 @@ public class Hand {
         return String.format("(%d Cards)", this.hand.size());
     }
 
-    public String displayOpenHand() {
+    public String displayOpenHand(boolean hasAce) {
         StringBuilder content = new StringBuilder();
     
         // Loop through each card in the hand
@@ -190,13 +190,10 @@ public class Hand {
         }
         content.append("\n");
     
-        content.append("\ntotal score: " + this.getHandScore());
+        if (!hasAce) {
+            content.append("\ntotal score: " + this.getHandScore());
+        }
     
         return content.toString();
     }
-
-    // @Override
-    // public String toString() {
-    //     return "Hand [hand=" + hand + "]";
-    // }
 }

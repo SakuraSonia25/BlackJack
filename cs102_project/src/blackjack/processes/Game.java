@@ -9,8 +9,8 @@ import blackjack.menus.*;
 
 public class Game {
 
-    //Constants for Colours
-    public static final String ANSI_RESET = "\u001B[0m"; //It goes to normal
+    // Constants for Colours
+    public static final String ANSI_RESET = "\u001B[0m"; // It goes to normal
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_CYAN = "\u001B[36m";
@@ -65,7 +65,7 @@ public class Game {
 
         }
         this.dealer.setHand(new Hand(d));
-        
+
         // inform human the cards have been distributed
         System.out.println("2 cards have been distributed to each player.");
 
@@ -90,12 +90,20 @@ public class Game {
 
         if (!r.isAllPlayersChallenged()) { // if not all players are challenged
             // Ensure to challenge remaining players
-            System.out.println("You auto challenges the rest of the players!"); // inform human
+
+            if (RoundDisplay.findHuman() == this.dealer) {
+                System.out.println("You auto challenges the rest of the players!"); // inform human
+            }else {
+                System.out.println( dealer.getName() + " auto challenges the rest of the players!"); // inform human
+            }
 
             r.dealerChallenge(this.players);
 
-            // display challenge result
-            RoundDisplay.displayChallengeResult(this.players, this.dealer);
+            if (!(this.dealer instanceof BotDealer)) {
+                // display challenge result
+                RoundDisplay.displayChallengeResult(this.players, this.dealer);
+            }
+
         }
         // display round result
         RoundDisplay.displayRoundResult(this.players, this.dealer);
@@ -114,7 +122,7 @@ public class Game {
         while ((!isInteger(answer) && !answer.equals("A")) || (isInteger(answer)
                 && (Integer.parseInt(answer) <= 0 || Integer.parseInt(answer) > p.getCashAmt()))) {
             // Err msg
-            System.out.println("Please enter a number more than 0 and less then your cash value or A.");
+            System.out.println("Please enter a number more than 0 and less then your cash value or A.\n");
 
             // Reprompt
             System.out.print("Enter bet amt or 'A' for all-in: ");
@@ -145,11 +153,15 @@ public class Game {
 
     public void displayOverallGameResults(Person human) {
 
+        int playerRank = 1; // Assume player rank is first
+
         // get game result
         TreeMap<String, Integer> gameResultMap = getOverallGameResults();
 
         // get a sorted version (highest cash -> lowest cash)
-        List<String> collect = gameResultMap.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).map(entry -> entry.getKey()).collect(Collectors.toList());
+        List<String> collect = gameResultMap.entrySet().stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).map(entry -> entry.getKey())
+                .collect(Collectors.toList());
 
         // Display Game Result Message
         System.out.println(ANSI_CYAN);
@@ -157,25 +169,40 @@ public class Game {
         System.out.println("||  GAME RESULT! \\(>o<)/ ||");
         System.out.println("============================");
         System.out.print(ANSI_RESET);
-        int i = 1;
+
+        int i = 1; // track listing index
         for (String name : collect) {
             if (human.getName().equals(name)) {
                 System.out.println(i + ". YOU " + "(balance: $" + gameResultMap.get(name) + ")");
-            } else{
+                playerRank = i;
+            } else {
                 System.out.println(i + ". " + name + " (balance: $" + gameResultMap.get(name) + ")");
             }
             i++;
         }
 
         // display human result
-        if (human.getCashAmt() > dealer.getCashAmt()) {
-            System.out.println("\n"+ ANSI_GREEN + "WOW HUAT AH YOU WON" + ANSI_RESET);
-        } else if (human.getCashAmt() < dealer.getCashAmt()){
-            System.out.println("\n"+ ANSI_RED + "AIYO you lost leh :( it's okay!" + ANSI_RESET);
-        } else {
-            System.out.println("\n"+ ANSI_CYAN + "Draw ah... Aya better than losing :/" + ANSI_RESET);
+        if (human instanceof Player) {
+            if (human.getCashAmt() > dealer.getCashAmt()) {
+                System.out.println("\n" + ANSI_GREEN + "WOW HUAT AH YOU WON DEALER" + ANSI_RESET);
+            } else if (human.getCashAmt() < dealer.getCashAmt()) {
+                System.out.println("\n" + ANSI_RED + "AIYO you lost leh :( it's okay!" + ANSI_RESET);
+            } else {
+                System.out.println("\n" + ANSI_GREEN + "Draw ah... Aya better than losing :/" + ANSI_RESET);
+            }
         }
-        
+        System.out.println("");
+
+        if (playerRank == 1) {
+            System.out.println(ANSI_GREEN +"WAH SEH, FIRST PLACE! YOU PRO!"+ ANSI_RESET);
+        } else if (playerRank == 2) {
+            System.out.println(ANSI_GREEN +"WOW YOURE SECOND, SO CLOSE"+ ANSI_RESET);
+        } else if (playerRank == 2) {
+            System.out.println("YOURE THIRD, NOT BAD");
+        } else if (playerRank == 2) {
+            System.out.println("FOURTH? NO WORRIES, CAN PLAY AGAIN :)");
+        }
+
         System.out.println(ANSI_CYAN + "----- END GAME -----" + ANSI_RESET);
     }
 
@@ -209,13 +236,4 @@ public class Game {
         }
         return true;
     }
-
-    // public void terminateGame(String endGame) { //assume gets input whether
-    // player wants to end game
-    // if (isDealerBankrupt() || endGame.equals("yes")) {
-    // //output overall results
-    // displayOverallGameResults();
-    // //dont know how to exit
-    // }
-    // }
 }

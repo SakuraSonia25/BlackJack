@@ -5,15 +5,16 @@ import java.io.*;
 
 import blackjack.items.*;
 
-public class BotPlayer extends Player {
+public class BotDealer extends Dealer {
 
-    public BotPlayer(String name, int cashAmt, Hand hand, int betAmt) {
-        super(name, cashAmt, hand, betAmt);
+    public BotDealer(String name, int cashAmt, Hand hand) {
+        super(name, cashAmt, hand);
     }
 
-    public char determineAction() {
+    // for dealer to choose when to hit or challenge
+    public boolean determineHit() {
 
-        // Introduce a delay of 1.5 seconds before bot does each action
+        // pause to imitate thinking between each action
         try {
             Thread.sleep(1500);
         } catch (InterruptedException e) {
@@ -30,6 +31,22 @@ public class BotPlayer extends Player {
         } else {
             return handleHardHand();
         }
+    }
+
+    // for dealer to choose who to challenge
+    public Player determineChallenge(List<Player> listOfPlayers) {
+
+        //pause to imitate thinking between each action
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Player playerToChallenge = choosePlayerToChallenge(listOfPlayers);
+
+        return playerToChallenge;
+
     }
 
     private boolean isPair() {
@@ -56,21 +73,22 @@ public class BotPlayer extends Player {
             numberofAces--;
         }
 
-        return hasAce && totalValue <= 21;
-        
+        return hasAce && totalValue <= 21; 
     }
 
-    private char handlePair() {
+    private boolean handlePair() {
         ArrayList<Card> hand = super.getHandFromPerson().getHand();
 
         if (hand.get(0).getCardValue().equals("Ace")) {
-            return 's'; // Always stand if the pair is Ace
+            return false; // Always stand if the pair is Ace
+        } else if (hand.get(0).getCardValue().equals("2") || hand.get(0).getCardValue().equals("3")){
+            return true;
         } else {
-            return 'h';
+            return super.getHandScore() < 17;
         }
     }
 
-    private char handleSoftHand() {
+    private boolean handleSoftHand() {
         int handScore = super.getHandScore();
         int aceCount = 0; //counter for aces in hand
 
@@ -88,23 +106,64 @@ public class BotPlayer extends Player {
             handScore = handScore - 11 + chooseAceValue();
         }
 
-        // bot will be more aggressive as it has the flexibility of Ace
-        if (handScore < 19) {
-            return 'h';
-        } else {
-            return 's';
-        }
+        // bot will be more aggressive as it has the flexibility of the Ace
+        return handScore < 19;
     }
 
-    private char handleHardHand() {
+    private boolean handleHardHand() {
         int handScore = super.getHandScore();
 
         // bot will be more conservative as it has no Ace
-        if (handScore >= 16) {
-            return 's';
+        return handScore < 16;
+    }
+
+    // Method to choose which player to challenge
+    private Player choosePlayerToChallenge(List<Player> players) {
+        
+        Player selectedPlayer = players.getFirst();
+
+        if (determineHit() == true) {
+            if (isSoftHand()) {
+                selectedPlayer = findPlayerWithMostCards(players);
+            } else {
+                selectedPlayer = findPlayerWithLeastCards(players);
+            }
         } else {
-            return 'h';
+            if (isSoftHand()) {
+                selectedPlayer = findPlayerWithLeastCards(players);
+            } else {
+                selectedPlayer = findPlayerWithMostCards(players);
+            }
         }
+
+        return selectedPlayer;
+    }
+
+    // Method to find the player with the least cards
+    private Player findPlayerWithLeastCards(List<Player> players) {
+        Player leastCardsPlayer = players.getFirst();
+        for (Player current : players) {
+            int size = current.getHandSize();
+            if(size < leastCardsPlayer.getHandSize()) {
+                leastCardsPlayer = current;
+            }
+        }
+    
+        return leastCardsPlayer;
+    }
+
+    // Method to find the player with the most cards
+    private Player findPlayerWithMostCards(List<Player> players) {
+
+        Player mostCardsPlayer = players.getFirst();
+        for (Player current : players) {
+            int size = current.getHandSize();
+            if(size > mostCardsPlayer.getHandSize()) {
+                mostCardsPlayer = current;
+            }
+        }
+
+        return mostCardsPlayer;
     }
 
     // Method to choose Ace value
@@ -125,11 +184,11 @@ public class BotPlayer extends Player {
         }
     }
 
-        // Method to pull random reaction for bot
-    public String getPlayerRandomReaction() {
+    // Method to pull random reaction for bot
+    public String getDealerRandomReaction() {
         List<String> reactions = new ArrayList<>();
 
-        String filePath = "sourceFiles/blackjack/players/player.txt";
+        String filePath = "src/blackjack/players/dealer.txt";
 
         try (Scanner sc = new Scanner(new File(filePath))) {
             String line;

@@ -1,1 +1,1 @@
-javac -d classes -cp sourceFiles;blackjack.menus sourceFiles\blackjack\Blackjack.java
+javac -d classes -cp src;blackjack.menus src\blackjack\Blackjack.java

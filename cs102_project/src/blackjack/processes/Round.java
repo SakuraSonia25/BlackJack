@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.*;
 
-// PACKAGES ISSUE
 import blackjack.items.*;
 import blackjack.players.*;
 import blackjack.menus.*;
@@ -236,7 +235,7 @@ public class Round {
             sc.nextLine();
             return choice;
         } catch (InputMismatchException e) {
-            System.out.println("Caught an InputMismatchException.");
+            // System.out.println("Caught an InputMismatchException.");
             sc.nextLine();
             return -2;
         }
@@ -277,8 +276,7 @@ public class Round {
 
             // select all remaining players to challenge TBC
             else if (choice == 0) {
-                // loop thr the players list and add players not challenged into the oppenents
-                // list
+                // loop thr the players list and add players not challenged into the oppenents list
                 for (Player p : this.players) {
                     if (RoundDisplay.getPlayerResult(p) == 'c') {
                         oppenents.add(p);
@@ -394,11 +392,9 @@ public class Round {
 
         // auto challenge - hand burst or got lucky hand
         if (turnOutcome != 'n' && challenging) {
-            // if choice was to hit
-            if (choice == 1) {
-                // return turn result
-                RoundDisplay.displayTurnResult(turnOutcome, this.dealer);
-            }
+
+            // return turn result
+            RoundDisplay.displayTurnResult(turnOutcome, this.dealer);
 
             // update player lucky hand
             RoundDisplay.setPlayerLucky(this.dealer, turnOutcome);
@@ -419,13 +415,24 @@ public class Round {
     public int promptForAceValue(Person p) {
         int value = 0;
         do {
-            System.out.println("\nYou got an Ace Card! (default value is 11) ");
-            RoundDisplay.displayHandStr(p);
-            System.out.print("Enter your desire value for the card (1 or 10 or 11):");
-            value = checkForInputException(sc);
+            System.out.println("\nYou got an Ace Card!");
+            RoundDisplay.displayHandStr(p, true);
+            System.out.print("Enter your desired value for the card ");
 
-            if (value != 1 && value != 10 && value != 11) {
-                System.out.println(ANSI_RED + "Please enter a value of 1, 10 or 11" + ANSI_RESET);
+            //specific value of card
+            if (p.getHandSize() == 2) {
+                System.out.print("(1 or 10 or 11): ");
+                value = checkForInputException(sc);
+                if (value != 1 && value != 10 && value != 11) {
+                    System.out.println(ANSI_RED + "Please enter a value of 1, 10 or 11" + ANSI_RESET);
+                }
+            }
+            else if (p.getHandSize() == 3) {
+                System.out.println("(1 or 10): ");
+                value = checkForInputException(sc);
+                if (value != 1 && value != 10) {
+                    System.out.println(ANSI_RED + "Please enter a value of 1 or 10" + ANSI_RESET);
+                }
             }
 
         } while (value != 1 && value != 10 && value != 11);
@@ -521,8 +528,7 @@ public class Round {
             dealerHand = this.dealer.getHandFromPerson();
         }
 
-        System.out
-                .println(ANSI_CYAN + "\n" + botDealer.getName() + " is going to challenge now MUHAHAHAHA" + ANSI_RESET);
+        System.out.println(ANSI_CYAN + "\n" + botDealer.getName() + " is going to challenge now MUHAHAHAHA" + ANSI_RESET);
 
         // track which player is still not challenged
         List<Player> toChallenge = new ArrayList<>(players);
@@ -588,6 +594,18 @@ public class Round {
     public void updateCashAmt(List<Player> playerList) {
         for (Player p : playerList) {
             int playerBetAmt = p.getBetAmt();
+
+            //update for special hands
+            if (this.getTypeOfHand(p) == 'j' || this.getTypeOfHand(p) == 'd') {
+                playerBetAmt *= 2;
+            }
+            else if (this.getTypeOfHand(p) == 'a') {
+                playerBetAmt *= 3;
+            }
+            else if (this.getTypeOfHand(p) == 's') {
+                playerBetAmt *= 7;
+            }
+
             // LOSE CASE - player pay dealer
             if (RoundDisplay.getPlayerResult(p) == 'l') {
                 p.setCashAmt(p.getCashAmt() - playerBetAmt);
@@ -599,7 +617,6 @@ public class Round {
                 this.dealer.setCashAmt(this.dealer.getCashAmt() - playerBetAmt);
             }
         }
-
     }
 
     /* HELPER METHODS */
@@ -647,7 +664,7 @@ public class Round {
 
     public void pausing(int noOfmillisec) {
         try {
-            Thread.sleep(noOfmillisec); // 2000 milliseconds = 2 seconds
+            Thread.sleep(noOfmillisec); // 1000 milliseconds = 1 seconds
 
         } catch (InterruptedException e) {
             // TODO: handle exception
