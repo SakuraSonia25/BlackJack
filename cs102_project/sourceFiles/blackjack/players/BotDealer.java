@@ -11,7 +11,8 @@ public class BotDealer extends Dealer {
         super(name, cashAmt, hand);
     }
 
-    public char determineAction() {
+    // for dealer to choose when to hit or challenge
+    public boolean determineHit() {
 
         try {
             Thread.sleep(1000);
@@ -31,6 +32,7 @@ public class BotDealer extends Dealer {
         }
     }
 
+    // for dealer to choose who to challenge
     public Player determineChallenge(List<Player> listOfPlayers) {
 
         try {
@@ -73,36 +75,30 @@ public class BotDealer extends Dealer {
         
     }
 
-    private char handlePair() {
+    private boolean handlePair() {
         ArrayList<Card> hand = super.getHandFromPerson().getHand();
 
         if (hand.get(0).getCardValue().equals("Ace")) {
-            return 's'; // Always stand if the pair is Ace
+            return false; // Always stand if the pair is Ace
+        } else if (hand.get(0).getCardValue().equals("2") || hand.get(0).getCardValue().equals("3")){
+            return true;
         } else {
-            return 'h';
+            return super.getHandScore() < 17;
         }
     }
 
-    private char handleSoftHand() {
+    private boolean handleSoftHand() {
         int handScore = super.getHandScore();
 
         // bot will be more aggressive as it has the flexibility of the Ace
-        if (handScore < 19) {
-            return 'h';
-        } else {
-            return 's';
-        }
+        return handScore < 19;
     }
 
-    private char handleHardHand() {
+    private boolean handleHardHand() {
         int handScore = super.getHandScore();
 
         // bot will be more conservative as it has no Ace
-        if (handScore >= 16) {
-            return 's';
-        } else {
-            return 'h';
-        }
+        return handScore < 16;
     }
 
     // Method to choose which player to challenge
@@ -110,7 +106,7 @@ public class BotDealer extends Dealer {
         
         Player selectedPlayer = players.getFirst();
 
-        if (determineAction() == 'h') {
+        if (determineHit() == true) {
             if (isSoftHand()) {
                 selectedPlayer = findPlayerWithMostCards(players);
             } else {

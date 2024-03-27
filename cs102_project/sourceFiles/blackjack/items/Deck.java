@@ -38,15 +38,5 @@ public class Deck {
 
         return toDeal;
     }
-
-    // ADDED: Deal number of Cards to a Person p.
-    public void dealCardsToPerson(Person p, int noOfCards) {
-        List<Card> toDeal = new ArrayList<>(); 
-
-        for (int i = 0; i < noOfCards; i++) {
-            toDeal.add(dealCards());
-        }
-
-        p.getHandFromPerson().addCard(toDeal);
-    }    
+   
 }

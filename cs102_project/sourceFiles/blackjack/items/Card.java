@@ -12,15 +12,13 @@ public class Card {
         this.suit = suit;
         this.value = value;
 
-        int cardScore = 0;
         if (value.equals("Jack") || value.equals("Queen") || value.equals("King")) {
-            cardScore += 10;
+            this.score = 10;
         } else if (value.equals("Ace")) {
-            cardScore += 11;
+            this.score = 11;
         } else {
-            cardScore += Integer.parseInt(value);
+            this.score = Integer.parseInt(value);
         }
-        this.score = cardScore;
     }
      
     public String getCardSuit() {
