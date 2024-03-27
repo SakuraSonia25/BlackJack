@@ -1,13 +1,19 @@
 package blackjack.items;
 
 public class Card {
-    // private static final int maxValue = 1;
-    // private static final int minValue = 11;
 
+    // Constants For Card Icons
+    private final char heart = '\u0003';
+    private final char diamond = '\u0004';
+    private final char club = '\u0005';
+    private final char spade = '\u0006';
+
+    // Attributes
     private String value;
     private String suit;
     private int score;
 
+    // Constructor
     public Card(String suit, String value) {
         this.suit = suit;
         this.value = value;
@@ -21,6 +27,7 @@ public class Card {
         }
     }
      
+    // Getter Methods
     public String getCardSuit() {
         return this.suit;
     }
@@ -33,7 +40,7 @@ public class Card {
         return this.score;
     }    
     
-    //After getting player's decision, update total hand accordingly for Ace card
+    // Update Ace card score after getting player input
     public void updateAce(int playerDecision) {
         String cardValue = this.value;
         if (cardValue.equals("Ace")) {
@@ -41,10 +48,63 @@ public class Card {
         }
     }
     
-    @Override
-    public String toString() {
-        return "Card [value=" + value + ", suit=" + suit + ", score=" + score + "]";
+    // Display Card + score its adding to hand
+    public String displayCard() {
+        StringBuilder content = new StringBuilder();
+    
+        // Construct the top border of the card
+        content.append("\t_____");
+
+        content.append("\n");
+    
+        // Construct the rank line of the card
+        content.append("\t|");
+        content.append(String.format("%-3s", this.getCardValue().charAt(0) == '1'? this.getCardValue(): this.getCardValue().charAt(0))); // Left-align the rank
+        content.append("| ");
+
+        content.append("\n");
+    
+        // Construct the suit line of the card
+        content.append("\t| ");
+        char suitSymbol;
+        switch (this.getCardSuit()) {
+            case "Diamond":
+                suitSymbol = diamond;
+                break;
+            case "Club":
+                suitSymbol = club;
+                break;
+            case "Heart":
+                suitSymbol = heart;
+                break;
+            case "Spade":
+                suitSymbol = spade;
+                break;
+            default:
+                suitSymbol = '?';
+                break;
+        }
+        content.append(suitSymbol);
+        content.append(" | ");
+
+        content.append("\n");
+
+        // Construct the bottom border of the card
+        content.append("\t|___| ");
+
+        int totalScoreAdded = 0;
+    
+        content.append("\n");
+    
+        content.append("\nadded " + this.getCardScore() + " to your hand");
+    
+        return content.toString();
     }
+
+    // @Override
+    // public String toString() {
+    //     return "Card [value=" + value + ", suit=" + suit + ", score=" + score + "]";
+    // }
 
     // // Dealer's side
     // public int drawAce(int totalHand, int totalHandScore) {

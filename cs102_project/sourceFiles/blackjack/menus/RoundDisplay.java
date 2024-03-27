@@ -1,25 +1,22 @@
 package blackjack.menus;
 
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
-import blackjack.items.Hand;
-import blackjack.players.BotDealer;
-import blackjack.players.BotPlayer;
-import blackjack.players.Dealer;
-import blackjack.players.Person;
-import blackjack.players.Player;
+import blackjack.items.*;
+import blackjack.players.*;
 
 public class RoundDisplay {
 
+    // Constants for Colours
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+
     // To Print the icons
-    public static PrintWriter stdout = new PrintWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8),
-            true);
+    public static PrintWriter stdout = new PrintWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8),true);
     private static Scanner sc = new Scanner(System.in);
 
     /* ENCODINGS */
@@ -53,203 +50,256 @@ public class RoundDisplay {
     // Store Players Results // [Player : {result, lucky, status}]
     public static Map<Person, char[]> playersResult = new HashMap<>();
 
-
     // Rest Result Map
     public static void resetMap() {
         playersResult = new HashMap<>();
     }
 
-    // Set Player Status
+    // Setter Methods
     public static void setPlayerStatus(Person p, char status) {
         char[] info = playersResult.get(p);
         info[2] = status;
         playersResult.put(p, info);
     }
 
-    // Set Player Result
     public static void setPlayerResult(Person p, char result) {
         char[] info = playersResult.get(p);
         info[0] = result;
         playersResult.put(p, info);
     }
 
-    // Set Player LuckyHand
     public static void setPlayerLucky(Person p, char lucky) {
         char[] info = playersResult.get(p);
         info[1] = lucky;
         playersResult.put(p, info);
     }
 
-    // Getter methods
+    // Getter Methods
     public static char getPlayerStatus(Person p) {
         char[] info = playersResult.get(p);
         return info[2];
     }
 
-    // Set Player Result
     public static char getPlayerResult(Person p) {
         char[] info = playersResult.get(p);
         return info[0];
     }
 
-    // Set Player LuckyHand
     public static char getPlayerLucky(Person p) {
         char[] info = playersResult.get(p);
         return info[1];
     }
 
-    /* DISPLAY METHODS */
+    // Display Option Menus Methods
+    // Player Option Menu
     public static void displayPlayerTurnOptions(Hand playerHand, Dealer dealer, List<Player> players) {
 
-        String handStr = "Your Hand: \n" + playerHand.displayOpenHand();
+        String handStr = "Your Hand: \n" + ANSI_GREEN + playerHand.displayOpenHand() + ANSI_RESET;
         int handStrlen = handStr.indexOf("_\n") + 1;
-
+        // heading
         System.out.println("");
         displayHeading("Your Turn (Player)", '=', handStrlen);
+        // table
         displayTable(handStrlen, dealer, players);
+        // player hand
         displayHoriLine('-', handStrlen, '\n');
         System.out.println(handStr);
         displayHoriLine('-', handStrlen, '\n');
+        // options
         System.out.println("1. Hit");
         System.out.println("2. Stand");
         System.out.print("Please enter your choice: ");
     }
-
+    // Dealer Option Menu
     public static void displayDealerTurnOptions(Hand dealerHand, List<Player> players) {
 
-        String handStr = "Your Hand: \n" + dealerHand.displayOpenHand();
+        String handStr = "Your Hand: \n" + ANSI_GREEN + dealerHand.displayOpenHand() + ANSI_RESET;
         int handStrlen = handStr.indexOf("_\n") + 1;
-
+        // heading
         System.out.println("");
         displayHeading("Your Turn (Dealer)", '=', handStrlen);
+        // table
         displayRemainingTable(handStrlen, players);
+        // dealer hand
         displayHoriLine('-', handStrlen, '\n');
         System.out.println(handStr);
         displayHoriLine('-', handStrlen, '\n');
+        // options
         System.out.println("1. Hit");
         System.out.println("2. Challenge");
         System.out.print("Please enter your choice: ");
     }
-
+    // Dealer - Choose Opponent Option Menu
     public static void displayChallengeOptions(Hand dealerHand, List<Player> players) {
 
-        String handStr = "Your Hand: \n" + dealerHand.displayOpenHand();
+        String handStr = "Your Hand: \n" + ANSI_GREEN + dealerHand.displayOpenHand() + ANSI_RESET;
         int handStrlen = handStr.indexOf("_\n") + 1;
-
+        // heading
         System.out.println("");
         displayHeading("Pick your Opponent(s)", '=', handStrlen);
+        // options / table
         System.out.println("0. All Players at table");
         displayRemainingTable(handStrlen, players);
+        // dealer hand
         displayHoriLine('-', handStrlen, '\n');
         System.out.println(handStr);
         displayHoriLine('-', handStrlen, '\n');
         System.out.print("Please enter the player's index (or -1 to stop selecting): ");
     }
-
+    
+    // Display Tables
+    // display all players on table
     public static void displayTable(int headingLength, Dealer dealer, List<Player> players) {
         displayHeading("table", '-', headingLength);
         // Print Dealer
         if (dealer instanceof BotDealer) {
-            System.out.println("1. Dealer " + dealer.getHandFromPerson().displayCloseHand());
+            System.out.println("1. " + dealer.getName() + " " + dealer.getHandFromPerson().displayCloseHand());
         }
-        // // Print Players
-        int i = 1;
+        // Print Players
+        int i = 2;
         for (Player p : players) {
+
             if (p instanceof BotPlayer) {
                 System.out.println(i + ". " + p.getName() + " " + p.getHandFromPerson().displayCloseHand());
                 i++;
             }
         }
     }
-
+    // display only remaining non challenged players on table
     public static void displayRemainingTable(int headingLength, List<Player> players) {
+        // heading
         displayHeading("table", '-', headingLength);
-        // // Print Players
+        // display remaining unchallenged players
         for (int i = 0; i < players.size(); i++) {
             if (getPlayerResult(players.get(i)) == 'c') {
-                System.out.println((i + 1) + ". " + players.get(i).getName() + " "
-                        + players.get(i).getHandFromPerson().displayCloseHand());
+                System.out.println((i + 1) + ". " + players.get(i).getName() + " " + players.get(i).getHandFromPerson().displayCloseHand());
             }
         }
     }
 
+    // Display Results
+    // Round Result
     public static void displayRoundResult(List<Player> players, Dealer dealer) {
-        System.out.println("");
+
+        Person p = findHuman(); // Find who is human
+
+        // Heading
+        System.out.println(ANSI_CYAN);
         System.out.println("=======================");
         System.out.println("||  ROUND ENDED! ^o^ ||");
         System.out.println("=======================");
+        System.out.print(ANSI_RESET);
 
-        // Find Human
-        for (Person p : playersResult.keySet()) {
-            // if human is player
-            if ((p instanceof Player) && !(p instanceof BotPlayer)) {
-                // display player result + cash amt
-                System.out.println("YOU " + resultMap.get(getPlayerResult(p)) + "!");
-                System.out.println("Dealer Hand:");
-                System.out.println(dealer.getHandFromPerson().displayOpenHand());
-                System.out.println("Your Hand:");
-                System.out.println(p.getHandFromPerson().displayOpenHand());
-                System.out.println("Your current cash amount: " + p.getCashAmt());
-                System.out.println("Dealer cash amount: " + dealer.getCashAmt());
-            }
-            // if human is dealer
-            if ((p instanceof Dealer) && !(p instanceof BotDealer)) {
-                // display challenge result of all players + dealer cash amt
-                int i = 1;
-                for (Player player : players) {
-                    System.out.println(i + "." + player.getName() + " (" + resultMap.get(getPlayerResult(player)) + ")");
-                    i++;
-                }
-                System.out.println("\nYour current cash amount: " + p.getCashAmt());
-            }
-
-        }
-        System.out.println("");
-    }
-
-    public static void displayChallengeResult(List<Player> oppenents, Dealer dealer) {
-        System.out.println("\n=== Challenge Result ===");
+        // Print Round Sumaary
+        System.out.println("Round Summary: ");
         int i = 1;
-        for (Player opp : oppenents) {
-            System.out.println(i + "." + opp.getName() + " " + resultMap.get(getPlayerResult(opp)));
-            System.out.println(opp.getHandFromPerson().displayOpenHand());
+        // display dealer if human is not dealer
+        if (p != dealer) {
+            System.out.println(ANSI_CYAN + i + ". " + dealer.getName() + " (Balance: $" + dealer.getCashAmt()+ ")" + ANSI_RESET); 
             i++;
         }
-        System.out.println("Your current cash amount: " + dealer.getCashAmt());
+        // display players
+        for (Player player : players) {
+            if (p == player) { // compare addresses
+                System.out.println(i + ". YOU " + resultMap.get(getPlayerResult(player))); 
+            } else {
+                System.out.println(
+                        i + ". " + player.getName() + " " + resultMap.get(getPlayerResult(player)) + " (Balance: $" + player.getCashAmt()+ ")");
+            }
+            i++;
+        }
+
+        // if human is player
+        if ((p instanceof Player) && !(p instanceof BotPlayer)) {           
+            // player result
+            System.out.println("\nResult: YOU " + resultMap.get(getPlayerResult(p)) + " THE ROUND!");
+            // dealer hand
+            System.out.println("Dealer Hand:");
+            System.out.println(ANSI_GREEN + dealer.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+            System.out.println();
+            // player hand
+            System.out.println("Your Hand:");
+            System.out.println(ANSI_GREEN + p.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+            // player cash amt
+            System.out.println(String.format("Your current cash amount: %s",(p.getCashAmt() <= 0 ? ANSI_RED + "$" + p.getCashAmt() + "(Bankrupt)" + ANSI_RESET : "$" + p.getCashAmt())));
+        }
+        // if human is dealer
+        if ((p instanceof Dealer) && !(p instanceof BotDealer)) {
+            // dealer cash amt
+            System.out.println(String.format("\nYour current cash amount: %s",(p.getCashAmt() <= 0 ? ANSI_RED + "$" + p.getCashAmt() + "(Bankrupt)" + ANSI_RESET : "$" + p.getCashAmt())));
+        }
+        
         promptEnterKey(); // prompt player to press enter key to proceed
     }
 
+    // Challenge Result
+    public static void displayChallengeResult(List<Player> oppenents, Dealer dealer) {
+        // heading
+        System.out.println(ANSI_CYAN + "\n=== Challenge Result ===" + ANSI_RESET);
+        // display all oppenent and their result
+        int i = 1;
+        for (Player opp : oppenents) {
+            System.out.println(i + "." + opp.getName() + " " + resultMap.get(getPlayerResult(opp)));
+            System.out.println(ANSI_GREEN + opp.getHandFromPerson().displayOpenHand() + ANSI_RESET);
+            i++;
+        }
+        // display dealer cash amount
+        System.out.println("Your current cash amount: $" + dealer.getCashAmt());
+
+        promptEnterKey(); // prompt player to press enter key to proceed
+    }
+
+    // Turn Result
     public static void displayTurnResult(char turnOutcome, Person player) {
-        System.out.print("\n");
-        if (turnOutcome != 'n') {
-            if (player instanceof BotPlayer) {
-                System.out.println(player.getName() + " " + (turnOutcome != 'b' ? "GOT" : "")
-                        + luckyHandMap.get(turnOutcome) + "!\n");
-            } else {
-                System.out.println("YOU " + (turnOutcome != 'b' ? "GOT " + luckyHandMap.get(turnOutcome) +"!(~ ' 3 ')~"  : luckyHandMap.get(turnOutcome)+ "! ( T _ T )"));
+
+        // if player is bot
+        if (player instanceof BotPlayer || player instanceof BotDealer) {
+            // if player is a bot dealer
+            if (player instanceof BotDealer) {
+                // hand burst or got lucky hand
+                if (turnOutcome != 'n') {
+                    // print hand outcome + hand  
+                    System.out.println("\n" + player.getName() + (turnOutcome != 'b' ? " GOT " + luckyHandMap.get(turnOutcome) + "!": luckyHandMap.get(turnOutcome) + "!"));
+                    displayHandStr(player);
+                } 
+                // normal hand
+                else {
+                    System.out.println(player.getName() + " is done!\n");
+                }
+                
+            } 
+            // player is a bot player
+            else {
+                System.out.println("Player " + player.getName() + "'s turn ends!\n");
+            }
+        }
+        // else, playe ris human
+        else {
+            if (turnOutcome != 'n') {
+                System.out.println(ANSI_CYAN + "\n OMGGG YOU " + (turnOutcome != 'b' ? "GOT " + luckyHandMap.get(turnOutcome) + "!(~ ' 3 ')~": luckyHandMap.get(turnOutcome) + "! ( T _ T )" + ANSI_RESET));
                 displayHandStr(player);
                 promptEnterKey(); // prompt player to press enter key to proceed
-            }
-        } else {
-            if (player instanceof BotPlayer) {
-                System.out.println("Player " + player.getName() + "'s turn ends!\n");
             } else {
-                System.out.println("Your turn ends!\n");
+                System.out.println(ANSI_CYAN + "Your turn ends!\n" + ANSI_RESET);
             }
+
         }
     }
 
-    public static void displayHandStr(Person p) {
-        String handStr = "Your Hand: \n" + p.getHandFromPerson().displayOpenHand();
+    /* Helper Methods */
+
+    public static void displayHandStr(Person p) { 
+        // using the hand str to calculate length of heading
+        String handStr = "Your Hand: \n" + p.getHandFromPerson().displayOpenHand(); 
         int handStrlen = handStr.indexOf("_\n") + 1;
+
         displayHeading("Your Hand", '-', handStrlen);
-        System.out.println(p.getHandFromPerson().displayOpenHand());
+        System.out.println(ANSI_GREEN + p.getHandFromPerson().displayOpenHand() + ANSI_RESET);
     }
 
-    /* HELPER METHODS */
     public static void promptEnterKey() {
         // Scanner sc = new Scanner(System.in);
-        System.out.print("Press \"ENTER\" to continue...");
+        System.out.print(ANSI_CYAN + "Press \"ENTER\" to continue...\n" + ANSI_RESET);
         try {
             sc.nextLine();
         } catch (Exception e) {
@@ -263,11 +313,21 @@ public class RoundDisplay {
 
     public static void displayHeading(String title, char chara, int length) {
         int charlength = (length - title.length()) / 2;
-        String heading = ("" + chara).repeat(charlength) + " " + title + " " + ("" + chara).repeat(charlength);
+        String heading = ANSI_CYAN + ("" + chara).repeat(charlength) + " " + title + " "
+                + ("" + chara).repeat(charlength) + ANSI_RESET;
         System.out.println(heading);
 
     }
 
-    
+    public static Person findHuman() { 
+
+        for (Person p : playersResult.keySet()) {
+            if (((p instanceof Player) && !(p instanceof BotPlayer)) || ((p instanceof Dealer) && !(p instanceof BotDealer))) {
+                return p;
+            }
+        }
+
+        return null;
+    }
 
 }

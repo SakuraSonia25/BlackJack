@@ -3,15 +3,16 @@ package blackjack.items;
 import java.util.*;
 
 public class Hand {
-    // Symbols ADDED
+    // Constants For Card Icons
     private final char heart = '\u0003';
     private final char diamond = '\u0004';
     private final char club = '\u0005';
     private final char spade = '\u0006';
     
+    // Attribute
     private ArrayList<Card> hand;
 
-    // hand constructor
+    // Constructor
     public Hand(Deck deck) {
         // create arraylist to store cards
         ArrayList<Card> playerHand = new ArrayList<>();
@@ -27,7 +28,7 @@ public class Hand {
         this.hand = playerHand;
     }
 
-    /* GETTER METHODS */
+    // Getter Methods
     public ArrayList<Card> getHand() {
         return this.hand;
     }
@@ -50,12 +51,8 @@ public class Hand {
 
         return totalHandScore;
     }
-    @Override
-    public String toString() {
-        return "Hand [hand=" + hand + "]";
-    }
-
-    /* SETTER AND UPDATE METHODS */
+   
+    // Setter and Update Methods
     public void addCard(Card... cardList) {
         for (Card c : cardList) {
             this.hand.add(c);
@@ -66,7 +63,7 @@ public class Hand {
         this.hand.clear();
     }
 
-    /* CHECK METHODS */
+    // Boolean Methods 
     public boolean checkBlackjack() {
         if (this.getHandScore() == 21) {
             return true;
@@ -83,8 +80,8 @@ public class Hand {
 
         return false;
     }
-    // call this when player has drawn the 5th card
-    public boolean checkDragon() {
+    
+    public boolean checkDragon() { // call this when player has drawn the 5th card
         // Added the 5 cards check
         if (this.getHand().size() == 5 && this.getHandScore() <= 21) {
             return true;
@@ -120,10 +117,6 @@ public class Hand {
         return false;
     }
 
-    public boolean checkBurst() {
-        return this.getHandScore() > 21;
-    }
-
     public boolean checkForAcesCard() {
         for (Card c : this.hand) {
             if (c.getCardValue().equals("Ace")) {
@@ -133,8 +126,15 @@ public class Hand {
         return false;
     }
 
+    public boolean checkBurst() {
+        return this.getHandScore() > 21;
+    }
 
-    /* DISPLAY VALUE */
+    // Display Hand Methods
+    public String displayCloseHand() {
+        return String.format("(%d Cards)", this.hand.size());
+    }
+
     public String displayOpenHand() {
         StringBuilder content = new StringBuilder();
     
@@ -195,7 +195,8 @@ public class Hand {
         return content.toString();
     }
 
-    public String displayCloseHand() {
-        return String.format("(%d Cards)", this.hand.size());
-    }
+    // @Override
+    // public String toString() {
+    //     return "Hand [hand=" + hand + "]";
+    // }
 }

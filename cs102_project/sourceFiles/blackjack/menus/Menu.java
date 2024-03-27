@@ -1,24 +1,32 @@
 package blackjack.menus;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import blackjack.processes.*;
 import blackjack.players.*;
 
 public class Menu {
 
+    //Constants for Colours
+    public static final String ANSI_RESET = "\u001B[0m"; //It goes to normal
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+
     static final Scanner scanner = new Scanner(System.in);
 
+    //Display the main menu of the game
     public void displayMain() {
-        System.out.println("==== Start Menu ====");
+        // System.out.println("\033[H\033[2J"); //This code clears the terminal
+        System.out.println(ANSI_CYAN + "==== Start Menu ====" + ANSI_RESET);
         System.out.println("1. Start Game");
         System.out.println("2. Read Rules");
         System.out.println("3. End Program");
         System.out.print("Please enter your choice:");
+
     }
 
+    //To display the rules of the games
     public void displayRules() {
         try {
             Thread.sleep(300);
@@ -28,31 +36,51 @@ public class Menu {
             Thread.sleep(400);
             System.out.println(".\n");
             Thread.sleep(600);
-            System.out.println("==== RULES ====");
-            System.out.println("1. Blah Blah Blah");
-            System.out.println("2. Blah Blah Blah");
-            System.out.println("3. Blah Blah Blah");
-            System.out.println("4. Blah Blah Blah");
-            System.out.println("5. Blah Blah Blah");
-            System.out.println("6. Blah Blah Blah");
-            System.out.println("7. Blah Blah Blah");
-            System.out.println("8. Blah Blah Blah");
+            System.out.println(ANSI_CYAN + "==== RULES ====" + ANSI_RESET);
 
-            System.out.print("\nPress Enter to go back to Menu: ");
+            //NOT THE MOST EFFICIENT WAY OF PRINTING
+            System.out.println("Aim: Attain a total sum of card values, as close to 21, but not over");
+            System.out.println("How can one win the game?\n");
+            
+            System.out.println("1. By getting a lucky starting hand. These lucky hands are:");
+            System.out.println("\t a) Blackjack: When the player draws an Ace together with either a King, Queen or Jack");
+            System.out.println("\t b) 2 Ace: Player draws 2 Ace");
+            System.out.println("Note: If dealer also has a lucky hand, the round will end in a draw\n");
+            
+            System.out.println("2.By winning the dealer without getting a bust");
+            System.out.println("\t a)Bust: Occurs when total sum of card values exceeds 21");
+            System.out.println("\t b)No bust: If sum is more than dealer's sum of card values, you win!");
+            System.out.println("Note: If both you and dealer has a bust, game ends in a draw\n");
+            
+            System.out.println("Details of Card Values:");
+            System.out.println("\t a)The cards 2-10 have a value respective to their number");
+            System.out.println("\t b)The Aces have a value of 1, 10, or 11 when there are 2 cards on Hand");
+            System.out.println("\t 1 or 10 when there are 3 cards on Hand; 1 when there are 4 or more cards on Hand");
+            System.out.println("\t c)The picture cards have a value of 10\n");
+            
+            System.out.println("Other possible lucky cards:");
+            System.out.println("\t a) Dragon: When the total value of 5 cards on Hand is below 21");
+            System.out.println("\t b) Triple 7: When all the 3 cards on Hand all have the value of 7");
+            
+            System.out.print(ANSI_CYAN + "\nPress Enter to go back to Menu: " + ANSI_RESET);
+        
             scanner.nextLine();
             System.out.println("\n");
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    //The output of each option(1,2 3) that user chooses
     public void MainOptions() {
         int choice;
         do {
+
             displayMain();
 
             while (!scanner.hasNextInt()) {
-                System.out.println("\nPlease enter a valid choice between 1 and 3.\n");
+                System.out.println(ANSI_RED + "\nPlease enter a valid choice between 1 and 3.\n" + ANSI_RESET);
                 scanner.nextLine(); // Consume invalid input
                 displayMain();
             }
@@ -65,20 +93,25 @@ public class Menu {
                     break;
                 case 2:
                     displayRules();
+                    System.out.println("\033[H\033[2J"); //This code clears the terminal
                     break;
                 case 3:
-                    System.out.println("\nThank you for playing, see you again!");
+                    System.out.println(ANSI_CYAN + "\nThank you for playing, see you again!" + ANSI_RESET);
+                    System.exit(0);
                     break;
                 default:
-                    System.out.println("\nPlease enter a valid choice between 1 and 3.\n");
+                    System.out.println(ANSI_RED + "\nPlease enter a valid choice between 1 and 3.\n" + ANSI_RESET);
             }
+
         } while (choice != 3);
-        scanner.close();
+        // scanner.close();
         // VERY IMPORTANT TO ONLY CLOSE SCANNER HERE
     }
 
+    //Game menu displayed after human chooses option 1
     public void displayGame() {
-        System.out.println("\n==== Game Menu ====");
+        // System.out.println("\033[H\033[2J"); //Code to clear terminal from start to where cursor is now
+        System.out.println(ANSI_CYAN + "==== Game Menu ====" + ANSI_RESET);
         System.out.println("1. Play as Player");
         System.out.println("2. Play as Dealer");
         System.out.println("3. Back");
@@ -93,7 +126,9 @@ public class Menu {
             displayGame();
 
             while (!scanner.hasNextInt()) {
-                System.out.println("\nPlease enter a valid choice between 1 and 3.");
+
+                System.out.println(ANSI_RED + "\nPlease enter a valid choice between 1 and 3.\n" + ANSI_RESET);
+
                 scanner.nextLine(); // Consume invalid input
                 displayGame();
             }
@@ -111,20 +146,20 @@ public class Menu {
                     System.out.println();
                     break;
                 default:
-                    System.out.println("\nPlease enter a valid choice between 1 and 3.");
+                System.out.println(ANSI_RED + "\nPlease enter a valid choice between 1 and 3.\n" + ANSI_RESET);
             }
         } while (choice < 1 || choice > 3);
     }
 
     public void startPlayerGame(String name) {
         // Values you get from mainManu
-        int cashAmt = 5000;
-        int numOfPlayers = 4;
+        int cashAmt = 5000; //fixed
+        int numOfPlayers = 4; //fixed
         boolean isDealer = false;
         
         // Generate players and dealer 
         List<Player> playerList = new ArrayList<>();
-        Dealer d = new BotDealer("DealerBot", cashAmt, null);
+        Dealer d = new BotDealer("Yeow Leong the BOSS", cashAmt, null);
 
         if (isDealer) {
             d = new Dealer(name, cashAmt, null);  //set cards to null first
@@ -134,10 +169,17 @@ public class Menu {
             playerList.add(currentPlayer);
         }
 
+        //Names for bots
+        List<String> botNames = new ArrayList<>();
+        botNames.add("Christie");
+        botNames.add("King Yeh");
+        botNames.add("Zhiyuan");
+        botNames.add("Lay Foo");
+
         //add other players to playerList
         for (int i = 1; i < numOfPlayers; i++) {
             //create player bots
-            BotPlayer playerBot = new BotPlayer("Bot " + i, cashAmt, null, 50);  
+            BotPlayer playerBot = new BotPlayer(botNames.get(i), cashAmt, null, 50);  
             playerList.add(playerBot);
         }
 
@@ -149,7 +191,9 @@ public class Menu {
 
         //implement game
         do {
-            System.out.println("===== ROUND " + roundNo + "/10 =====");
+
+            // System.out.println("\033[H\033[2J"); //Clear terminal
+            System.out.println(ANSI_CYAN + "===== ROUND " + roundNo + "/10 =====" + ANSI_RESET);
             Round r = g.startRound();
             g.endRound(r);
 
@@ -157,8 +201,8 @@ public class Menu {
             for (Player p : playerList) {
                 if (!(p instanceof BotPlayer) && g.isHumanBankrupt(p)) {
                     //end game
-                    System.out.println("You Lost the Game!");
-                    System.out.println("----- END GAME -----");
+                    // display overall game result
+                    g.displayOverallGameResults(RoundDisplay.findHuman());
                     System.out.println();
                     this.MainOptions();
                 }
@@ -168,31 +212,28 @@ public class Menu {
 
             //check if dealer is bankrupt
             if (g.isDealerBankrupt()) {
-                System.out.println("Congratulations! You Won the Game!");
-                System.out.println("----- END GAME -----");
+                // display overall game result
+                g.displayOverallGameResults(RoundDisplay.findHuman());
                 System.out.println();
                 this.MainOptions(); // End the game after printing the result
             }
-
-            
 
             /* =========================================================== *
              * Prompt user whether they want to continue to the next round *
              * or end the Game prematurely (Game ends automatically at the *
              * 10th round)                                                 *
              * =========================================================== */ 
-            
 
             String userInput = "";
             boolean validInput = false;
-            while (!validInput && roundNo < 10) {
+            while (!validInput && roundNo <= 10) {
                 try {
                     System.out.print("Would you like to continue? (y/n): ");
                     userInput = scanner.nextLine().toLowerCase().trim();
                     if (userInput.equals("y") || userInput.equals("n")) {
                         validInput = true;
                     } else {
-                        throw new IllegalArgumentException("Invalid input. Please enter 'y' or 'n'\n");
+                        throw new IllegalArgumentException(ANSI_RED + "Invalid input. Please enter 'y' or 'n'\n" + ANSI_RESET);
                     }
                 } catch (IllegalArgumentException e) {
                     System.out.println(e.getMessage());
@@ -205,11 +246,13 @@ public class Menu {
 
             roundNo++;
 
-        } while (roundNo < 10);
-    }
-    
+        } while (roundNo <= 10);
 
-    
+        // display overall game result
+        g.displayOverallGameResults(RoundDisplay.findHuman());
+        System.out.println();
+    }
+
     public void startDealerGame(String name) {
         // Values you get from mainManu
         int cashAmt = 5000;
@@ -218,7 +261,7 @@ public class Menu {
         
         // Generate players and dealer 
         List<Player> playerList = new ArrayList<>();
-        Dealer d = new BotDealer("DealerBot", cashAmt, null);
+        Dealer d = new BotDealer("Yeow Leong the BOSS", cashAmt, null);
 
         if (isDealer) {
             d = new Dealer(name, cashAmt, null);  //set cards to null first
@@ -229,10 +272,17 @@ public class Menu {
             playerList.add(currentPlayer);
         }
 
+        //Names for bots
+        List<String> botNames = new ArrayList<>();
+        botNames.add("Christie");
+        botNames.add("King Yeh");
+        botNames.add("Zhiyuan");
+        botNames.add("Lay Foo");
+
         //add other players to playerList
-        for (int i = 0; i < numOfPlayers; i++) {
+        for (int i = 1; i < numOfPlayers; i++) {
             //create player bots
-            BotPlayer playerBot = new BotPlayer("Bot " + i, cashAmt, null, 50);  
+            BotPlayer playerBot = new BotPlayer(botNames.get(i), cashAmt, null, 50);  
             playerList.add(playerBot);
         }
 
@@ -245,7 +295,8 @@ public class Menu {
         //implement game
 
         do {
-            System.out.println("===== ROUND " + roundNo + "/10 =====");
+            // System.out.println("\033[H\033[2J"); //Clear the terminal
+            System.out.println(ANSI_CYAN + "\n===== ROUND " + roundNo + "/10 =====" + ANSI_RESET);
             Round r = g.startRound();
             g.endRound(r);
 
@@ -253,16 +304,16 @@ public class Menu {
             g.removeBankruptPlayers();
             
             if (playerList.size() == 0) {
-                System.out.println("Congratulations! You Won the Game!");
-                System.out.println("----- END GAME -----");
+                // display overall game result
+                g.displayOverallGameResults(RoundDisplay.findHuman());
                 System.out.println();
                 this.MainOptions();
             }
 
             //check if dealer is bankrupt
             if (g.isDealerBankrupt()) {
-                System.out.println("You Lost the Game!");
-                System.out.println("----- END GAME -----");
+                // display overall game result
+                g.displayOverallGameResults(RoundDisplay.findHuman());
                 System.out.println();
                 this.MainOptions(); 
             }
@@ -283,7 +334,9 @@ public class Menu {
                     if (userInput.equals("y") || userInput.equals("n")) {
                         validInput = true;
                     } else {
-                        throw new IllegalArgumentException("Invalid input. Please enter 'y' or 'n'\n");
+
+                        throw new IllegalArgumentException(ANSI_RED + "Invalid input. Please enter 'y' or 'n'\n" + ANSI_RESET);
+
                     }
                 } catch (IllegalArgumentException e) {
                     System.out.println(e.getMessage());
@@ -297,7 +350,13 @@ public class Menu {
             roundNo++;
 
         } while (roundNo < 10);
+
+        // display overall game result
+        g.displayOverallGameResults(RoundDisplay.findHuman());
+        System.out.println();
+
     }
+    
 }
 
         
