@@ -48,9 +48,9 @@ The human player is allowed to choose if he/she wants to take the role of the de
 11. The game wil end when the human player does not want to continue with the game, or when he/she is bankrupt, or when the Dealer for the game is bankrupt
 
 ## Directories
-|-- cs102_project
-  |-- classes
-  |-- sourceFiles
+|-- cs102_project \n
+  |-- classes\n
+  |-- sourceFiles\n
     |-- blackjack
       |-- items
         |-- Card.java
